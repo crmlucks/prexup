@@ -97,11 +97,11 @@ export default function PropertiesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {properties.map((prop, idx) => (
           <motion.div 
+            key={prop.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.05 }}
-            key={prop.id} 
-            className="group glass rounded-xl overflow-hidden border border-card-border hover:border-brand-purple/30 transition-all"
+            className="glass rounded-xl overflow-hidden border-thin group hover:border-primary-brand transition-all flex flex-col h-full"
           >
             <div className="relative h-40 bg-foreground/5 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity" />

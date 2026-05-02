@@ -48,7 +48,7 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1 }}
             key={stat.label} 
-            className="glass p-4 rounded-xl relative group overflow-hidden"
+            className="glass p-4 rounded-xl relative group overflow-hidden border-thin hover:border-primary-brand transition-all"
           >
             <div className="flex items-center justify-between mb-3">
               <div className={`p-2 rounded-lg bg-foreground/5 ${stat.color}`}>

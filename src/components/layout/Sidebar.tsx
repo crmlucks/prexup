@@ -43,7 +43,7 @@ export const Sidebar = () => {
     <motion.aside
       initial={false}
       animate={{ width: isCollapsed ? '80px' : '240px' }}
-      className="fixed left-0 top-0 h-screen glass border-r z-50 flex flex-col transition-colors duration-300"
+      className="fixed left-0 top-0 h-screen glass border-r border-primary-subtle z-50 flex flex-col transition-colors duration-300"
     >
       {/* Header */}
       <div className="p-4 flex items-center justify-between overflow-hidden">
@@ -105,7 +105,7 @@ export const Sidebar = () => {
       </nav>
 
       {/* Footer Actions */}
-      <div className="p-3 border-t border-white/5 space-y-1">
+      <div className="p-3 border-t border-primary-subtle space-y-1">
         <button 
           onClick={toggleTheme}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-muted hover:bg-white/5 transition-all group"

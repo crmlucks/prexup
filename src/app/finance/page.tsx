@@ -46,7 +46,7 @@ export default function FinancePage() {
           <p className="text-muted text-xs mt-0.5">Control de comisiones, gastos y crecimiento financiero.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass-hover border border-card-border text-[11px]">
+          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass-hover border border-primary-subtle text-[11px]">
             <Download size={14} />
             Descargar CSV
           </button>
