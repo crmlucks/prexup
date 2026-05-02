@@ -50,7 +50,7 @@ export default function ChatPage() {
             <input 
               type="text" 
               placeholder="Buscar chats..." 
-              className="w-full pl-9 pr-3 py-1.5 bg-foreground/5 border border-card-border rounded-lg text-[11px] focus:outline-none focus:border-brand-purple/40 transition-all"
+              className="w-full pl-9 pr-3 py-1.5 rounded-lg text-[11px] focus:outline-none focus:border-brand-purple/40 transition-all"
             />
           </div>
         </div>

@@ -55,7 +55,7 @@ export default function PropertiesPage() {
             <input 
               type="text" 
               placeholder="Buscar por nombre o lugar..." 
-              className="pl-9 pr-3 py-1.5 rounded-lg bg-foreground/5 border border-card-border text-[11px] focus:outline-none focus:border-brand-purple/50 transition-all w-48 md:w-64"
+              className="pl-9 pr-3 py-1.5 rounded-lg text-[11px] focus:outline-none focus:border-brand-purple/50 transition-all w-48 md:w-64"
             />
           </div>
           <button 

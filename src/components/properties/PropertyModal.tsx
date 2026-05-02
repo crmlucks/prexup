@@ -90,14 +90,14 @@ export function PropertyModal({ isOpen, onClose, property }: { isOpen: boolean, 
                   <label className="text-[9px] font-black text-muted uppercase tracking-widest ml-0.5">Precio</label>
                   <div className="relative">
                     <DollarSign size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
-                    <input type="text" defaultValue={property?.price} className="w-full bg-foreground/[0.03] border border-card-border rounded-lg pl-8 pr-3 py-1.5 text-[11px] focus:outline-none focus:border-brand-purple/40" />
+                    <input type="text" defaultValue={property?.price} className="w-full rounded-lg pl-8 pr-3 py-1.5 text-[11px] focus:outline-none focus:border-brand-purple/40" />
                   </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] font-black text-muted uppercase tracking-widest ml-0.5">Tipo</label>
                   <div className="relative">
                     <Home size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
-                    <select className="w-full bg-foreground/[0.03] border border-card-border rounded-lg pl-8 pr-3 py-1.5 text-[11px] focus:outline-none appearance-none cursor-pointer">
+                    <select className="w-full rounded-lg pl-8 pr-3 py-1.5 text-[11px] focus:outline-none appearance-none cursor-pointer">
                       <option>Casa</option>
                       <option>Apartamento</option>
                       <option>Local</option>
@@ -110,13 +110,13 @@ export function PropertyModal({ isOpen, onClose, property }: { isOpen: boolean, 
                 <label className="text-[9px] font-black text-muted uppercase tracking-widest ml-0.5">Ubicación</label>
                 <div className="relative">
                   <MapPin size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
-                  <input type="text" defaultValue={property?.location} className="w-full bg-foreground/[0.03] border border-card-border rounded-lg pl-8 pr-3 py-1.5 text-[11px] focus:outline-none focus:border-brand-purple/40" />
+                  <input type="text" defaultValue={property?.location} className="w-full rounded-lg pl-8 pr-3 py-1.5 text-[11px] focus:outline-none focus:border-brand-purple/40" />
                 </div>
               </div>
 
               <div className="space-y-1">
                 <label className="text-[9px] font-black text-muted uppercase tracking-widest ml-0.5">Descripción</label>
-                <textarea rows={3} className="w-full bg-foreground/[0.03] border border-card-border rounded-lg p-3 text-[11px] focus:outline-none focus:border-brand-purple/40 resize-none" placeholder="Describe la propiedad..." />
+                <textarea rows={3} className="w-full rounded-lg p-3 text-[11px] focus:outline-none focus:border-brand-purple/40 resize-none" placeholder="Describe la propiedad..." />
               </div>
 
               <div className="flex items-center gap-3 pt-4">

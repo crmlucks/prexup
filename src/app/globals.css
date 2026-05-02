@@ -55,20 +55,31 @@ body {
 .p-compact { padding: 1rem; }
 .m-compact { margin: 1rem; }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 5px;
+/* Refined Inputs for Dark Mode */
+input, select, textarea {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--foreground);
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--brand-purple);
-  border-radius: 10px;
-  opacity: 0.5;
+[data-theme='dark'] input, 
+[data-theme='dark'] select, 
+[data-theme='dark'] textarea {
+  background-color: #121212 !important; /* Gris oscuro profundo */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #FFFFFF !important;
 }
 
-/* Gradient text */
-.text-gradient {
-  background: linear-gradient(to right, var(--brand-purple), #FF00FF, var(--brand-blue));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+[data-theme='light'] input, 
+[data-theme='light'] select, 
+[data-theme='light'] textarea {
+  background-color: #FFFFFF !important;
+  border: 1px solid rgba(15, 23, 42, 0.1) !important;
+  color: #0F172A !important;
+}
+
+/* Primary Border Utility */
+.border-primary-brand {
+  border-color: var(--brand-purple) !important;
+  border-width: 1px;
 }

@@ -59,7 +59,7 @@ export default function CRMPage() {
             <input 
               type="text" 
               placeholder="Buscar leads..." 
-              className="pl-9 pr-3 py-1.5 rounded-lg bg-foreground/5 border border-card-border text-[11px] focus:outline-none focus:border-brand-purple/50 transition-all w-48"
+              className="pl-9 pr-3 py-1.5 rounded-lg text-[11px] focus:outline-none focus:border-brand-purple/50 transition-all w-48"
             />
           </div>
           <button className="p-1.5 rounded-lg glass-hover border border-card-border">
@@ -93,7 +93,7 @@ export default function CRMPage() {
               </button>
             </div>
 
-            <div className="flex-1 space-y-3 p-2 bg-foreground/[0.01] rounded-xl border border-card-border">
+            <div className="flex-1 space-y-3 p-2 bg-foreground/[0.01] rounded-xl border border-primary-brand shadow-[0_0_15px_rgba(192,0,255,0.05)]">
               {leads.filter(l => l.status === col.id).map((lead) => (
                 <motion.div 
                   key={lead.id}
