@@ -18,12 +18,12 @@ import { motion } from 'framer-motion';
 import { PropertyModal } from '@/components/properties/PropertyModal';
 
 const properties = [
-  { id: '1', title: 'Modern Beachfront Villa', price: '$2.5M', location: 'Malibu, CA', type: 'House', beds: 5, baths: 4, area: '4,500 sqft', status: 'Available', image: '/api/placeholder/400/250' },
-  { id: '2', title: 'Penthouse Downtown', price: '$1.2M', location: 'Miami, FL', type: 'Apartment', beds: 3, baths: 2, area: '2,200 sqft', status: 'Reserved', image: '/api/placeholder/400/250' },
-  { id: '3', title: 'Luxury Estate', price: '$4.8M', location: 'Beverly Hills, CA', type: 'House', beds: 7, baths: 6, area: '8,200 sqft', status: 'Available', image: '/api/placeholder/400/250' },
-  { id: '4', title: 'Cozy Modern Loft', price: '$850k', location: 'Brooklyn, NY', type: 'Apartment', beds: 2, baths: 1, area: '1,500 sqft', status: 'Sold', image: '/api/placeholder/400/250' },
-  { id: '5', title: 'Suburban Family Home', price: '$600k', location: 'Austin, TX', type: 'House', beds: 4, baths: 3, area: '3,000 sqft', status: 'Available', image: '/api/placeholder/400/250' },
-  { id: '6', title: 'Commercial Office Space', price: '$3.5M', location: 'Chicago, IL', type: 'Commercial', beds: 0, baths: 4, area: '12,000 sqft', status: 'Available', image: '/api/placeholder/400/250' },
+  { id: '1', title: 'Villa Moderna frente al Mar', price: '$2.5M', location: 'Malibu, CA', type: 'Casa', beds: 5, baths: 4, area: '4,500 m²', status: 'Disponible', image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800' },
+  { id: '2', title: 'Penthouse en el Centro', price: '$1.2M', location: 'Miami, FL', type: 'Apartamento', beds: 3, baths: 2, area: '2,200 m²', status: 'Reservado', image: 'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&q=80&w=800' },
+  { id: '3', title: 'Mansión de Lujo', price: '$4.8M', location: 'Beverly Hills, CA', type: 'Casa', beds: 7, baths: 6, area: '8,200 m²', status: 'Disponible', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800' },
+  { id: '4', title: 'Loft Moderno Acogedor', price: '$850k', location: 'Brooklyn, NY', type: 'Apartamento', beds: 2, baths: 1, area: '1,500 m²', status: 'Vendido', image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=800' },
+  { id: '5', title: 'Casa Familiar Suburbana', price: '$600k', location: 'Austin, TX', type: 'Casa', beds: 4, baths: 3, area: '3,000 m²', status: 'Disponible', image: 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&q=80&w=800' },
+  { id: '6', title: 'Espacio de Oficina Comercial', price: '$3.5M', location: 'Chicago, IL', type: 'Comercial', beds: 0, baths: 4, area: '12,000 m²', status: 'Disponible', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800' },
 ];
 
 export default function PropertiesPage() {
@@ -36,124 +36,125 @@ export default function PropertiesPage() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 animate-fade-in pb-10">
       <PropertyModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         property={selectedProperty} 
       />
+      
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold font-outfit tracking-tight">Property Inventory</h1>
-          <p className="text-gray-400 text-sm mt-1">Manage and track your real estate listings.</p>
+          <h1 className="text-2xl font-bold font-outfit tracking-tight">Inventario de Propiedades</h1>
+          <p className="text-muted text-xs mt-0.5">Gestiona y rastrea tu catálogo inmobiliario.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+        <div className="flex items-center gap-2">
+          <div className="relative group">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-brand-purple transition-colors" />
             <input 
               type="text" 
-              placeholder="Search by location or name..." 
-              className="pl-10 pr-4 py-2 rounded-lg bg-white/5 border border-white/10 text-sm focus:outline-none focus:border-brand-purple/50 transition-all w-72"
+              placeholder="Buscar por nombre o lugar..." 
+              className="pl-9 pr-3 py-1.5 rounded-lg bg-foreground/5 border border-card-border text-[11px] focus:outline-none focus:border-brand-purple/50 transition-all w-48 md:w-64"
             />
           </div>
           <button 
             onClick={() => handleOpenModal()}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-brand text-white text-sm font-semibold shadow-lg shadow-brand-purple/20 transition-all hover:scale-[1.02]"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-brand text-white text-[11px] font-bold shadow-lg shadow-brand-purple/20 transition-all hover:scale-[1.02]"
           >
-            <Plus className="w-4 h-4" />
-            Add Property
+            <Plus size={14} />
+            Nueva Propiedad
           </button>
         </div>
       </div>
 
       {/* Filters Bar */}
-      <div className="flex flex-wrap gap-4 items-center p-2 rounded-2xl glass border border-white/5">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-white/5 cursor-pointer text-xs text-gray-400 transition-all">
-          <Home className="w-4 h-4 text-brand-purple" />
-          <span>Property Type</span>
-          <ChevronRight className="w-3 h-3 rotate-90" />
+      <div className="flex flex-wrap gap-2 items-center p-1.5 rounded-xl glass border border-card-border">
+        <div className="flex items-center gap-2 px-3 py-1 rounded-lg hover:bg-foreground/5 cursor-pointer text-[10px] font-bold text-muted transition-all uppercase tracking-wider">
+          <Home size={14} className="text-brand-purple" />
+          <span>Tipo</span>
+          <ChevronRight size={10} className="rotate-90" />
         </div>
-        <div className="w-px h-6 bg-white/10" />
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-white/5 cursor-pointer text-xs text-gray-400 transition-all">
-          <Tag className="w-4 h-4 text-brand-purple" />
-          <span>Price Range</span>
-          <ChevronRight className="w-3 h-3 rotate-90" />
+        <div className="w-px h-4 bg-card-border" />
+        <div className="flex items-center gap-2 px-3 py-1 rounded-lg hover:bg-foreground/5 cursor-pointer text-[10px] font-bold text-muted transition-all uppercase tracking-wider">
+          <Tag size={14} className="text-brand-purple" />
+          <span>Precio</span>
+          <ChevronRight size={10} className="rotate-90" />
         </div>
-        <div className="w-px h-6 bg-white/10" />
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-white/5 cursor-pointer text-xs text-gray-400 transition-all">
-          <MapPin className="w-4 h-4 text-brand-purple" />
-          <span>Location</span>
-          <ChevronRight className="w-3 h-3 rotate-90" />
+        <div className="w-px h-4 bg-card-border" />
+        <div className="flex items-center gap-2 px-3 py-1 rounded-lg hover:bg-foreground/5 cursor-pointer text-[10px] font-bold text-muted transition-all uppercase tracking-wider">
+          <MapPin size={14} className="text-brand-purple" />
+          <span>Lugar</span>
+          <ChevronRight size={10} className="rotate-90" />
         </div>
-        <button className="ml-auto flex items-center gap-2 px-4 py-1.5 rounded-xl bg-white/5 text-xs font-semibold text-white hover:bg-white/10 transition-all border border-white/5">
-          <Filter className="w-3 h-3" />
-          Advanced Filters
+        <button className="ml-auto flex items-center gap-2 px-3 py-1 rounded-lg bg-foreground/5 text-[10px] font-bold text-foreground hover:bg-foreground/10 transition-all border border-card-border uppercase tracking-widest">
+          <Filter size={12} />
+          Filtros
         </button>
       </div>
 
       {/* Property Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {properties.map((prop, idx) => (
           <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.05 }}
             key={prop.id} 
-            className="group glass rounded-2xl overflow-hidden border border-white/5 hover:border-brand-purple/30 transition-all"
+            className="group glass rounded-xl overflow-hidden border border-card-border hover:border-brand-purple/30 transition-all"
           >
-            <div className="relative h-48 bg-gray-800 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-              <img src={prop.image} alt={prop.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+            <div className="relative h-40 bg-foreground/5 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <img src={prop.image} alt={prop.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               
-              <div className="absolute top-4 left-4 z-20 flex gap-2">
-                <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
-                  prop.status === 'Available' ? 'bg-emerald-500 text-white' : 
-                  prop.status === 'Reserved' ? 'bg-amber-500 text-white' : 'bg-red-500 text-white'
+              <div className="absolute top-3 left-3 z-20 flex gap-2">
+                <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest ${
+                  prop.status === 'Disponible' ? 'bg-emerald-500 text-white' : 
+                  prop.status === 'Reservado' ? 'bg-amber-500 text-white' : 'bg-red-500 text-white'
                 }`}>
                   {prop.status}
                 </span>
               </div>
               
-              <button className="absolute top-4 right-4 z-20 p-2 rounded-full glass text-white hover:text-red-400 transition-colors">
-                <Heart className="w-4 h-4" />
+              <button className="absolute top-3 right-3 z-20 p-1.5 rounded-lg glass text-white hover:text-red-400 transition-colors">
+                <Heart size={14} />
               </button>
 
-              <div className="absolute bottom-4 left-4 z-20">
-                <p className="text-xl font-bold text-white tracking-tight">{prop.price}</p>
+              <div className="absolute bottom-3 left-3 z-20">
+                <p className="text-lg font-black text-white tracking-tight">{prop.price}</p>
               </div>
             </div>
 
-            <div className="p-5 space-y-4">
+            <div className="p-4 space-y-3">
               <div>
-                <h3 className="font-bold text-lg text-white group-hover:text-brand-purple transition-colors truncate">{prop.title}</h3>
-                <div className="flex items-center gap-1 text-gray-400 text-xs mt-1">
-                  <MapPin className="w-3 h-3" />
+                <h3 className="font-bold text-sm group-hover:text-brand-purple transition-colors truncate leading-tight">{prop.title}</h3>
+                <div className="flex items-center gap-1 text-muted text-[10px] mt-0.5 font-medium">
+                  <MapPin size={10} />
                   {prop.location}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between py-3 border-y border-white/5">
-                <div className="flex flex-col items-center gap-1">
-                  <BedDouble className="w-4 h-4 text-brand-purple" />
-                  <span className="text-[10px] text-gray-400">{prop.beds} Beds</span>
+              <div className="flex items-center justify-between py-2 border-y border-card-border">
+                <div className="flex flex-col items-center gap-0.5">
+                  <BedDouble size={14} className="text-brand-purple" />
+                  <span className="text-[9px] text-muted font-bold">{prop.beds} Hab.</span>
                 </div>
-                <div className="flex flex-col items-center gap-1">
-                  <Bath className="w-4 h-4 text-brand-purple" />
-                  <span className="text-[10px] text-gray-400">{prop.baths} Baths</span>
+                <div className="flex flex-col items-center gap-0.5">
+                  <Bath size={14} className="text-brand-purple" />
+                  <span className="text-[9px] text-muted font-bold">{prop.baths} Baños</span>
                 </div>
-                <div className="flex flex-col items-center gap-1">
-                  <Square className="w-4 h-4 text-brand-purple" />
-                  <span className="text-[10px] text-gray-400">{prop.area}</span>
+                <div className="flex flex-col items-center gap-0.5">
+                  <Square size={14} className="text-brand-purple" />
+                  <span className="text-[9px] text-muted font-bold">{prop.area}</span>
                 </div>
               </div>
 
               <button 
                 onClick={() => handleOpenModal(prop)}
-                className="w-full py-2.5 rounded-xl bg-white/5 text-sm font-semibold text-white group-hover:bg-brand-purple transition-all flex items-center justify-center gap-2"
+                className="w-full py-1.5 rounded-lg bg-foreground/5 text-[11px] font-bold hover:bg-brand-purple hover:text-white transition-all flex items-center justify-center gap-1.5"
               >
-                View Details
-                <ChevronRight className="w-4 h-4" />
+                Ver Detalles
+                <ChevronRight size={14} />
               </button>
             </div>
           </motion.div>

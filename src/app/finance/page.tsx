@@ -38,94 +38,91 @@ export default function FinancePage() {
   const netProfit = totalIncome - totalExpenses;
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold font-outfit tracking-tight">Finance</h1>
-          <p className="text-gray-400 text-sm mt-1">Track your commissions, expenses and financial growth.</p>
+          <h1 className="text-2xl font-bold font-outfit tracking-tight">Finanzas</h1>
+          <p className="text-muted text-xs mt-0.5">Control de comisiones, gastos y crecimiento financiero.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-lg glass-hover border border-white/10 text-sm">
-            <Download className="w-4 h-4" />
-            Download CSV
+        <div className="flex items-center gap-2">
+          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass-hover border border-card-border text-[11px]">
+            <Download size={14} />
+            Descargar CSV
           </button>
           <button 
-            onClick={() => showToast('Feature coming soon: Manual transaction entry', 'info')}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-brand text-white text-sm font-semibold shadow-lg shadow-brand-purple/20 transition-all hover:scale-[1.02]"
+            onClick={() => showToast('Próximamente: Entrada manual', 'info')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-brand text-white text-[11px] font-bold shadow-lg shadow-brand-purple/20 transition-all hover:scale-[1.02]"
           >
-            <DollarSign className="w-4 h-4" />
-            Add Transaction
+            <DollarSign size={14} />
+            Nueva Transacción
           </button>
         </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="glass p-6 rounded-2xl relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500">
-              <TrendingUp className="w-6 h-6" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="glass p-4 rounded-xl relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
+              <TrendingUp size={18} />
             </div>
-            <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">+12% vs last month</span>
+            <span className="text-[9px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-md">+12% vs mes anterior</span>
           </div>
-          <h3 className="text-gray-400 text-xs font-medium uppercase tracking-wider">Total Income</h3>
-          <p className="text-3xl font-bold text-white mt-1">${totalIncome.toLocaleString()}</p>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[40px] rounded-full group-hover:bg-emerald-500/10 transition-all" />
+          <h3 className="text-muted text-[10px] font-semibold uppercase tracking-wider">Ingresos Totales</h3>
+          <p className="text-2xl font-bold mt-1">${totalIncome.toLocaleString()}</p>
         </div>
 
-        <div className="glass p-6 rounded-2xl relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-xl bg-red-500/10 text-red-500">
-              <TrendingDown className="w-6 h-6" />
+        <div className="glass p-4 rounded-xl relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 rounded-lg bg-red-500/10 text-red-500">
+              <TrendingDown size={18} />
             </div>
-            <span className="text-[10px] font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded-full">-4% vs last month</span>
+            <span className="text-[9px] font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-md">-4% vs mes anterior</span>
           </div>
-          <h3 className="text-gray-400 text-xs font-medium uppercase tracking-wider">Total Expenses</h3>
-          <p className="text-3xl font-bold text-white mt-1">${totalExpenses.toLocaleString()}</p>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 blur-[40px] rounded-full group-hover:bg-red-500/10 transition-all" />
+          <h3 className="text-muted text-[10px] font-semibold uppercase tracking-wider">Gastos Totales</h3>
+          <p className="text-2xl font-bold mt-1">${totalExpenses.toLocaleString()}</p>
         </div>
 
-        <div className="glass p-6 rounded-2xl relative overflow-hidden group bg-gradient-to-br from-brand-purple/20 to-brand-blue/20 border-brand-purple/20">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-xl bg-white/10 text-white">
-              <Wallet className="w-6 h-6" />
+        <div className="glass p-4 rounded-xl relative overflow-hidden group bg-gradient-brand text-white border-none shadow-xl shadow-brand-purple/20">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 rounded-lg bg-white/20 text-white">
+              <Wallet size={18} />
             </div>
           </div>
-          <h3 className="text-white/60 text-xs font-medium uppercase tracking-wider">Net Profit</h3>
-          <p className="text-3xl font-bold text-white mt-1">${netProfit.toLocaleString()}</p>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-[40px] rounded-full" />
+          <h3 className="text-white/60 text-[10px] font-semibold uppercase tracking-wider">Beneficio Neto</h3>
+          <p className="text-2xl font-bold mt-1">${netProfit.toLocaleString()}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Transactions Table */}
-        <div className="lg:col-span-2 glass rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold">Recent Transactions</h2>
-            <button className="text-sm text-brand-purple hover:text-brand-magenta transition-colors">View All</button>
+        <div className="lg:col-span-2 glass rounded-xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold">Transacciones Recientes</h2>
+            <button className="text-[11px] text-brand-purple font-bold">Ver todo</button>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-2.5">
             {loading ? (
               <div className="py-20 flex justify-center">
-                <div className="w-8 h-8 border-4 border-brand-purple/30 border-t-brand-purple rounded-full animate-spin" />
+                <div className="w-6 h-6 border-2 border-brand-purple/30 border-t-brand-purple rounded-full animate-spin" />
               </div>
             ) : transactions.map((tx) => (
-              <div key={tx.id} className="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5 group hover:bg-white/[0.04] transition-all">
-                <div className="flex items-center gap-4">
-                  <div className={`p-2 rounded-lg ${tx.type === 'income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
-                    {tx.type === 'income' ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+              <div key={tx.id} className="flex items-center justify-between p-3 rounded-lg bg-foreground/[0.02] border border-card-border group hover:bg-foreground/[0.04] transition-all">
+                <div className="flex items-center gap-3">
+                  <div className={`p-1.5 rounded-md ${tx.type === 'income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                    {tx.type === 'income' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-white truncate max-w-[200px]">{tx.title}</h4>
-                    <p className="text-[10px] text-gray-500">{tx.date}</p>
+                    <h4 className="text-[11px] font-bold truncate max-w-[150px]">{tx.title}</h4>
+                    <p className="text-[9px] text-muted">{tx.date}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className={`text-sm font-bold ${tx.type === 'income' ? 'text-emerald-500' : 'text-red-500'}`}>
+                  <p className={`text-[11px] font-black ${tx.type === 'income' ? 'text-emerald-500' : 'text-red-500'}`}>
                     {tx.type === 'income' ? '+' : ''}${Math.abs(tx.amount).toLocaleString()}
                   </p>
-                  <p className="text-[10px] text-gray-500">{tx.status}</p>
+                  <p className="text-[9px] text-muted">{tx.status}</p>
                 </div>
               </div>
             ))}
@@ -133,22 +130,22 @@ export default function FinancePage() {
         </div>
 
         {/* Breakdown / Sidebar Card */}
-        <div className="space-y-6">
-          <div className="glass rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-6">Expense Breakdown</h2>
-            <div className="space-y-4">
+        <div className="space-y-4">
+          <div className="glass rounded-xl p-5">
+            <h2 className="text-sm font-semibold mb-4">Distribución de Gastos</h2>
+            <div className="space-y-3">
               {[
-                { label: 'Marketing', amount: '$4,500', color: 'bg-blue-400', percent: 35 },
-                { label: 'Operations', amount: '$3,200', color: 'bg-purple-400', percent: 25 },
-                { label: 'Taxes', amount: '$2,800', color: 'bg-pink-400', percent: 22 },
-                { label: 'Others', amount: '$1,950', color: 'bg-orange-400', percent: 18 },
+                { label: 'Marketing', amount: '$4,500', color: 'bg-blue-500', percent: 35 },
+                { label: 'Operaciones', amount: '$3,200', color: 'bg-purple-500', percent: 25 },
+                { label: 'Impuestos', amount: '$2,800', color: 'bg-pink-500', percent: 22 },
+                { label: 'Otros', amount: '$1,950', color: 'bg-orange-500', percent: 18 },
               ].map((item) => (
-                <div key={item.label} className="space-y-2">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-400">{item.label}</span>
-                    <span className="text-white font-semibold">{item.amount}</span>
+                <div key={item.label} className="space-y-1.5">
+                  <div className="flex justify-between text-[10px]">
+                    <span className="text-muted font-medium">{item.label}</span>
+                    <span className="font-bold">{item.amount}</span>
                   </div>
-                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-1 w-full bg-foreground/5 rounded-full overflow-hidden">
                     <motion.div 
                       initial={{ width: 0 }}
                       animate={{ width: `${item.percent}%` }}
@@ -161,11 +158,11 @@ export default function FinancePage() {
             </div>
           </div>
 
-          <div className="glass rounded-2xl p-6 bg-gradient-brand border-none">
-            <h2 className="text-lg font-bold text-white mb-2">Ready to scale?</h2>
-            <p className="text-xs text-white/80 mb-4">Connect your bank account to automate commission tracking and tax filing.</p>
-            <button className="w-full py-2.5 rounded-xl bg-white text-brand-purple text-xs font-bold hover:bg-gray-100 transition-all">
-              Connect Account
+          <div className="glass rounded-xl p-5 bg-gradient-brand border-none text-white shadow-xl shadow-brand-purple/10">
+            <h2 className="text-sm font-bold mb-1">¿Listo para escalar?</h2>
+            <p className="text-[10px] text-white/80 mb-4 leading-relaxed">Conecta tu cuenta bancaria para automatizar el rastreo de comisiones e impuestos.</p>
+            <button className="w-full py-2 rounded-lg bg-white text-brand-purple text-[10px] font-black hover:bg-gray-100 transition-all">
+              Conectar Cuenta
             </button>
           </div>
         </div>

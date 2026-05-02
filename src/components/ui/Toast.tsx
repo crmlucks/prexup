@@ -26,37 +26,37 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 5000);
+    }, 4000);
   }, []);
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3">
+      <div className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2">
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
               key={toast.id}
-              initial={{ opacity: 0, x: 20, scale: 0.9 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 20, scale: 0.9 }}
-              className="glass p-4 rounded-2xl shadow-2xl border border-white/10 min-w-[300px] flex items-start gap-4"
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="glass p-3 rounded-xl shadow-xl border border-card-border min-w-[240px] max-w-[320px] flex items-center gap-3"
             >
               <div className={
-                toast.type === 'success' ? 'text-emerald-400' :
-                toast.type === 'error' ? 'text-red-400' :
-                toast.type === 'warning' ? 'text-amber-400' : 'text-brand-purple'
+                toast.type === 'success' ? 'text-emerald-500' :
+                toast.type === 'error' ? 'text-red-500' :
+                toast.type === 'warning' ? 'text-amber-500' : 'text-brand-purple'
               }>
-                {toast.type === 'success' && <CheckCircle className="w-5 h-5" />}
-                {toast.type === 'error' && <XCircle className="w-5 h-5" />}
-                {toast.type === 'warning' && <AlertCircle className="w-5 h-5" />}
-                {toast.type === 'info' && <Info className="w-5 h-5" />}
+                {toast.type === 'success' && <CheckCircle size={16} />}
+                {toast.type === 'error' && <XCircle size={16} />}
+                {toast.type === 'warning' && <AlertCircle size={16} />}
+                {toast.type === 'info' && <Info size={16} />}
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-white">{toast.message}</p>
+                <p className="text-[11px] font-bold leading-tight">{toast.message}</p>
               </div>
-              <button onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))} className="text-gray-500 hover:text-white">
-                <X className="w-4 h-4" />
+              <button onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))} className="text-muted hover:text-foreground p-1">
+                <X size={12} />
               </button>
             </motion.div>
           ))}

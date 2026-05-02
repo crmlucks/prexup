@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
@@ -8,86 +8,117 @@ import {
   Users, 
   MessageSquare, 
   Home, 
-  TrendingUp, 
-  Settings, 
-  Wallet,
+  PieChart, 
+  ChevronLeft, 
   ChevronRight,
-  LogOut
+  LogOut,
+  Moon,
+  Sun,
+  TrendingUp
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
-  { icon: Users, label: 'CRM', href: '/crm' },
-  { icon: MessageSquare, label: 'Chat', href: '/chat' },
-  { icon: Home, label: 'Properties', href: '/properties' },
-  { icon: Wallet, label: 'Finance', href: '/finance' },
-  { icon: TrendingUp, label: 'Sales', href: '/sales' },
-];
-
-export function Sidebar() {
+export const Sidebar = () => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const pathname = usePathname();
 
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
+
+  const menuItems = [
+    { name: 'Dashboard', icon: LayoutDashboard, href: '/' },
+    { name: 'Clientes CRM', icon: Users, href: '/crm' },
+    { name: 'Chat AI', icon: MessageSquare, href: '/chat' },
+    { name: 'Propiedades', icon: Home, href: '/properties' },
+    { name: 'Finanzas', icon: PieChart, href: '/finance' },
+    { name: 'Ventas', icon: TrendingUp, href: '/sales' },
+  ];
+
   return (
-    <aside className="w-64 h-screen glass border-r border-white/5 flex flex-col fixed left-0 top-0 z-50">
-      {/* Logo Section */}
-      <div className="p-6 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand-purple/20">
-          <TrendingUp className="text-white w-6 h-6" />
-        </div>
-        <span className="text-xl font-bold tracking-tight text-white">
-          Prex<span className="text-brand-purple">Up</span>
-        </span>
+    <motion.aside
+      initial={false}
+      animate={{ width: isCollapsed ? '80px' : '240px' }}
+      className="fixed left-0 top-0 h-screen glass border-r z-50 flex flex-col transition-colors duration-300"
+    >
+      {/* Header */}
+      <div className="p-4 flex items-center justify-between overflow-hidden">
+        <AnimatePresence mode="wait">
+          {!isCollapsed && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center gap-2"
+            >
+              <div className="w-8 h-8 bg-gradient-brand rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold">P</span>
+              </div>
+              <span className="font-outfit font-bold text-xl tracking-tight">PrexUp</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        <button 
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+        >
+          {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </button>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-4 py-4 space-y-1">
-        {navItems.map((item) => {
+      {/* Menu Items */}
+      <nav className="flex-1 px-3 py-4 space-y-1">
+        {menuItems.map((item) => {
           const isActive = pathname === item.href;
           return (
-            <Link 
-              key={item.label} 
-              href={item.href}
-              className={cn(
-                "flex items-center justify-between px-3 py-2.5 rounded-lg transition-all duration-200 group",
+            <Link key={item.name} href={item.href}>
+              <div className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative",
                 isActive 
-                  ? "bg-brand-purple/10 text-white border border-brand-purple/20" 
-                  : "text-gray-400 hover:text-white hover:bg-white/5"
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <item.icon className={cn(
-                  "w-5 h-5 transition-colors",
-                  isActive ? "text-brand-purple" : "group-hover:text-brand-purple"
-                )} />
-                <span className="text-sm font-medium">{item.label}</span>
+                  ? "bg-gradient-brand text-white shadow-lg shadow-brand-purple/20" 
+                  : "text-muted hover:bg-white/5 hover:text-white"
+              )}>
+                <item.icon size={20} className={cn("min-w-[20px]", isActive ? "text-white" : "group-hover:text-brand-purple")} />
+                {!isCollapsed && (
+                  <motion.span 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="text-sm font-medium whitespace-nowrap"
+                  >
+                    {item.name}
+                  </motion.span>
+                )}
+                {isCollapsed && (
+                  <div className="absolute left-full ml-4 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-[100]">
+                    {item.name}
+                  </div>
+                )}
               </div>
-              {isActive && (
-                <motion.div 
-                  layoutId="active-indicator"
-                  className="w-1.5 h-1.5 rounded-full bg-brand-purple shadow-[0_0_8px_rgba(192,0,255,0.8)]"
-                />
-              )}
             </Link>
           );
         })}
       </nav>
 
-      {/* Footer / User Profile */}
-      <div className="p-4 border-t border-white/5 mt-auto">
-        <div className="flex items-center gap-3 p-2 mb-4">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-purple to-brand-blue" />
-          <div className="flex flex-col">
-            <span className="text-xs font-semibold text-white">Alex Agent</span>
-            <span className="text-[10px] text-gray-400 uppercase tracking-wider">Premium Plan</span>
-          </div>
-        </div>
-        <button className="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-400/5 transition-all text-sm">
-          <LogOut className="w-4 h-4" />
-          <span>Logout</span>
+      {/* Footer Actions */}
+      <div className="p-3 border-t border-white/5 space-y-1">
+        <button 
+          onClick={toggleTheme}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-muted hover:bg-white/5 transition-all group"
+        >
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          {!isCollapsed && <span className="text-sm font-medium">Modo {theme === 'dark' ? 'Claro' : 'Oscuro'}</span>}
+        </button>
+
+        <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-all">
+          <LogOut size={20} />
+          {!isCollapsed && <span className="text-sm font-medium">Cerrar Sesión</span>}
         </button>
       </div>
-    </aside>
+    </motion.aside>
   );
-}
+};
