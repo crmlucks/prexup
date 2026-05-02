@@ -11,21 +11,26 @@ import {
   Clock,
   LayoutGrid,
   List as ListIcon,
-  GripVertical,
   ChevronRight,
   User,
-  ArrowRightLeft
+  GripHorizontal
 } from 'lucide-react';
-import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  DragDropContext, 
+  Droppable, 
+  Draggable, 
+  DropResult 
+} from '@hello-pangea/dnd';
 import { LeadModal } from '@/components/crm/LeadModal';
 import { cn } from '@/lib/utils';
 
 const columns = [
-  { id: 'new', title: 'Nuevos Leads', color: 'bg-blue-500' },
-  { id: 'qualified', title: 'Calificados', color: 'bg-purple-500' },
-  { id: 'proposal', title: 'Propuesta', color: 'bg-pink-500' },
-  { id: 'negotiation', title: 'Negociación', color: 'bg-orange-500' },
-  { id: 'won', title: 'Cerrado Ganado', color: 'bg-emerald-500' },
+  { id: 'new', title: 'Nuevos Leads', color: 'border-blue-500', dot: 'bg-blue-500' },
+  { id: 'qualified', title: 'Calificados', color: 'border-purple-500', dot: 'bg-purple-500' },
+  { id: 'proposal', title: 'Propuesta', color: 'border-pink-500', dot: 'bg-pink-500' },
+  { id: 'negotiation', title: 'Negociación', color: 'border-orange-500', dot: 'bg-orange-500' },
+  { id: 'won', title: 'Cerrado Ganado', color: 'border-emerald-500', dot: 'bg-emerald-500' },
 ];
 
 export default function CRMPage() {
@@ -35,24 +40,26 @@ export default function CRMPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    fetch('/api/leads')
-      .then(res => res.json())
-      .then(data => {
-        setLeads(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        // Fallback mock data if API fails
-        setLeads([
-          { id: '1', name: 'Sarah Miller', phone: '+1 234 567', status: 'new', budget: '$450k', property: 'Villa Beachfront', agent: 'Alex Morgan', source: 'WhatsApp', time: '2h ago' },
-          { id: '2', name: 'David Chen', phone: '+1 987 654', status: 'qualified', budget: '$1.2M', property: 'Penthouse', agent: 'Sarah Connor', source: 'Facebook', time: '5h ago' },
-        ]);
-        setLoading(false);
-      });
+    // Simulando carga de datos
+    setTimeout(() => {
+      setLeads([
+        { id: '1', name: 'Sarah Miller', phone: '+1 234 567', status: 'new', budget: '$450k', property: 'Villa Beachfront', agent: 'Alex Morgan', source: 'WhatsApp', time: 'Ahora' },
+        { id: '2', name: 'David Chen', phone: '+1 987 654', status: 'new', budget: '$1.2M', property: 'Penthouse', agent: 'Sarah Connor', source: 'Facebook', time: '5m' },
+        { id: '3', name: 'Juan Perez', phone: '+57 300...', status: 'qualified', budget: '$50k', property: 'Penthouse Downtown', agent: 'Sarah Connor', source: 'Facebook', time: '1h' },
+      ]);
+      setLoading(false);
+    }, 500);
   }, []);
 
-  const moveLead = (leadId: string, newStatus: string) => {
-    setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
+  const onDragEnd = (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+
+    if (!destination) return;
+    if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+
+    setLeads(prev => prev.map(l => 
+      l.id === draggableId ? { ...l, status: destination.droppableId } : l
+    ));
   };
 
   const handleAddLead = (newLead: any) => {
@@ -67,178 +74,157 @@ export default function CRMPage() {
         onSave={handleAddLead} 
       />
 
-      {/* Header & Controls */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold font-outfit tracking-tight">Gestión de Clientes CRM</h1>
-          <p className="text-muted text-xs mt-0.5">Visualiza y gestiona tu pipeline de ventas.</p>
+          <h1 className="text-2xl font-bold font-outfit tracking-tight">Embudo de Ventas</h1>
+          <p className="text-muted text-[11px] mt-0.5">Gestiona tus prospectos con precisión.</p>
         </div>
         
         <div className="flex items-center gap-2">
-          {/* View Toggle */}
-          <div className="flex p-1 bg-foreground/5 rounded-lg border border-card-border mr-2">
-            <button 
-              onClick={() => setView('kanban')}
-              className={cn("p-1.5 rounded-md transition-all", view === 'kanban' ? "bg-background shadow-sm text-brand-purple" : "text-muted hover:text-foreground")}
-            >
-              <LayoutGrid size={16} />
+          <div className="flex p-0.5 bg-foreground/5 rounded-lg border border-card-border mr-2">
+            <button onClick={() => setView('kanban')} className={cn("p-1.5 rounded-md transition-all", view === 'kanban' ? "bg-background shadow-sm text-brand-purple" : "text-muted")}>
+              <LayoutGrid size={14} />
             </button>
-            <button 
-              onClick={() => setView('list')}
-              className={cn("p-1.5 rounded-md transition-all", view === 'list' ? "bg-background shadow-sm text-brand-purple" : "text-muted hover:text-foreground")}
-            >
-              <ListIcon size={16} />
+            <button onClick={() => setView('list')} className={cn("p-1.5 rounded-md transition-all", view === 'list' ? "bg-background shadow-sm text-brand-purple" : "text-muted")}>
+              <ListIcon size={14} />
             </button>
           </div>
 
-          <div className="relative group hidden md:block">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-            <input 
-              type="text" 
-              placeholder="Buscar..." 
-              className="pl-9 pr-3 py-1.5 rounded-lg text-[11px] focus:outline-none focus:border-brand-purple/50 transition-all w-40"
-            />
-          </div>
-
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-brand text-white text-[11px] font-bold shadow-lg shadow-brand-purple/20 hover:scale-[1.02] transition-all"
-          >
+          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-brand text-white text-[11px] font-bold shadow-lg shadow-brand-purple/20 transition-all uppercase tracking-widest">
             <Plus size={14} />
             Nuevo Lead
           </button>
         </div>
       </div>
 
-      <AnimatePresence mode="wait">
-        {view === 'kanban' ? (
-          <motion.div 
-            key="kanban"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="flex gap-4 overflow-x-auto pb-4 min-h-[calc(100vh-220px)]"
-          >
+      {view === 'kanban' ? (
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="flex gap-4 overflow-x-auto pb-4 min-h-[calc(100vh-200px)] items-start">
             {columns.map((col) => (
               <div key={col.id} className="flex-shrink-0 w-64 flex flex-col">
-                <div className="flex items-center justify-between mb-3 px-1">
+                <div className="flex items-center justify-between mb-3 px-2">
                   <div className="flex items-center gap-2">
-                    <div className={`w-1.5 h-1.5 rounded-full ${col.color}`} />
-                    <h3 className="font-bold text-[10px] text-foreground uppercase tracking-widest">{col.title}</h3>
-                    <span className="text-[9px] text-muted bg-foreground/5 px-1.5 py-0.5 rounded-md">
+                    <div className={cn("w-1.5 h-1.5 rounded-full", col.dot)} />
+                    <h3 className="font-black text-[10px] text-foreground uppercase tracking-widest">{col.title}</h3>
+                    <span className="text-[9px] text-muted bg-foreground/5 px-1.5 py-0.5 rounded-md font-bold">
                       {leads.filter(l => l.status === col.id).length}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex-1 space-y-3 p-2 bg-foreground/[0.01] rounded-xl border border-primary-brand shadow-[0_0_15px_rgba(192,0,255,0.03)]">
-                  {leads.filter(l => l.status === col.id).map((lead) => (
-                    <motion.div 
-                      key={lead.id}
-                      layoutId={lead.id}
-                      className="glass p-3 rounded-lg cursor-grab active:cursor-grabbing hover:border-brand-purple/30 transition-all group relative"
+                <Droppable droppableId={col.id}>
+                  {(provided, snapshot) => (
+                    <div
+                      {...provided.droppableId}
+                      ref={provided.innerRef}
+                      className={cn(
+                        "flex-1 space-y-3 p-2 bg-foreground/[0.01] rounded-xl border border-thin transition-colors min-h-[150px]",
+                        snapshot.isDraggingOver ? "bg-foreground/[0.03] border-brand-purple/40" : "border-card-border"
+                      )}
                     >
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex gap-1">
-                          <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-foreground/5 text-muted">
-                            {lead.source}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <button className="text-muted hover:text-brand-purple transition-all p-1" title="Cambiar Etapa">
-                            <ArrowRightLeft size={10} />
-                          </button>
-                        </div>
-                      </div>
+                      {leads.filter(l => l.status === col.id).map((lead, index) => (
+                        <Draggable key={lead.id} draggableId={lead.id} index={index}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={cn(
+                                "glass p-3 rounded-lg border-thin transition-all group relative",
+                                col.color, // Color del borde igual al pipeline
+                                snapshot.isDragging && "shadow-2xl rotate-2 scale-105 z-50 border-brand-purple"
+                              )}
+                            >
+                              <div className="flex justify-between items-start mb-2">
+                                <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-foreground/5 text-muted">
+                                  {lead.source}
+                                </span>
+                                <GripHorizontal size={12} className="text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </div>
+                              
+                              <h4 className="font-bold text-[12px] mb-0.5 tracking-tight">{lead.name}</h4>
+                              <p className="text-[10px] text-muted leading-tight truncate">
+                                {lead.property} <br />
+                                <span className="text-[9px] opacity-70 italic">{lead.agent}</span>
+                              </p>
+                              
+                              <div className="flex items-center justify-between pt-2 mt-3 border-t border-card-border">
+                                <div className="flex items-center text-[10px] font-black text-emerald-500">
+                                  <DollarSign size={10} className="mr-0.5" />
+                                  {lead.budget}
+                                </div>
+                                <div className="flex items-center text-[9px] text-muted font-bold">
+                                  <Clock size={10} className="mr-0.5" />
+                                  {lead.time}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
                       
-                      <h4 className="font-bold text-[11px] mb-0.5 leading-tight">{lead.name}</h4>
-                      <p className="text-[9px] text-muted mb-3 truncate">{lead.property} • {lead.agent}</p>
-                      
-                      <div className="flex items-center justify-between pt-2 border-t border-card-border">
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center text-[9px] text-muted font-bold">
-                            <DollarSign size={10} className="mr-0.5 text-emerald-500" />
-                            {lead.budget}
-                          </div>
-                        </div>
-                        <div className="flex items-center text-[8px] text-muted font-medium">
-                          <Clock size={10} className="mr-0.5" />
-                          {lead.time}
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                  
-                  <button 
-                    onClick={() => setIsModalOpen(true)}
-                    className="w-full py-1.5 border border-dashed border-card-border rounded-lg text-[9px] text-muted hover:text-foreground hover:border-brand-purple/40 transition-all uppercase tracking-widest font-black"
-                  >
-                    + Añadir Lead
-                  </button>
-                </div>
+                      <button 
+                        onClick={() => setIsModalOpen(true)}
+                        className="w-full py-1.5 border border-dashed border-card-border rounded-lg text-[9px] text-muted hover:text-foreground hover:border-brand-purple/40 transition-all uppercase tracking-widest font-black"
+                      >
+                        + Añadir Lead
+                      </button>
+                    </div>
+                  )}
+                </Droppable>
               </div>
             ))}
-          </motion.div>
-        ) : (
-          <motion.div 
-            key="list"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="glass rounded-xl overflow-hidden border border-card-border"
-          >
-            <table className="w-full text-left">
-              <thead className="bg-foreground/[0.02] border-b border-card-border">
-                <tr className="text-[10px] text-muted uppercase tracking-widest font-black">
-                  <th className="px-4 py-3">Nombre</th>
-                  <th className="px-4 py-3">Estado</th>
-                  <th className="px-4 py-3">Presupuesto</th>
-                  <th className="px-4 py-3">Asesor</th>
-                  <th className="px-4 py-3">Origen</th>
-                  <th className="px-4 py-3 text-right">Acción</th>
-                </tr>
-              </thead>
-              <tbody className="text-[11px]">
-                {leads.map((lead) => (
-                  <tr key={lead.id} className="border-b border-card-border last:border-0 hover:bg-foreground/[0.01] transition-all group">
-                    <td className="px-4 py-2.5">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-brand-purple/10 flex items-center justify-center text-brand-purple">
-                          <User size={12} />
-                        </div>
-                        <div>
-                          <p className="font-bold">{lead.name}</p>
-                          <p className="text-[9px] text-muted">{lead.phone}</p>
-                        </div>
+          </div>
+        </DragDropContext>
+      ) : (
+        <div className="glass rounded-xl overflow-hidden border border-thin">
+          <table className="w-full text-left">
+            <thead className="bg-foreground/[0.02] border-b border-card-border">
+              <tr className="text-[10px] text-muted uppercase tracking-widest font-black">
+                <th className="px-4 py-3">Nombre</th>
+                <th className="px-4 py-3">Estado</th>
+                <th className="px-4 py-3">Presupuesto</th>
+                <th className="px-4 py-3">Asesor</th>
+                <th className="px-4 py-3 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody className="text-[11px]">
+              {leads.map((lead) => (
+                <tr key={lead.id} className="border-b border-card-border last:border-0 hover:bg-foreground/[0.01] transition-all">
+                  <td className="px-4 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-foreground/5 flex items-center justify-center text-muted">
+                        <User size={12} />
                       </div>
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <span className={cn(
-                        "px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest",
-                        columns.find(c => c.id === lead.status)?.color.replace('bg-', 'bg-opacity-10 text-')
-                      )}>
-                        {columns.find(c => c.id === lead.status)?.title}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5 font-bold text-emerald-500">{lead.budget}</td>
-                    <td className="px-4 py-2.5 text-muted">{lead.agent}</td>
-                    <td className="px-4 py-2.5">
-                      <span className="text-[9px] font-bold text-muted bg-foreground/5 px-1.5 py-0.5 rounded-md">
-                        {lead.source}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5 text-right">
-                      <button className="p-1.5 hover:bg-brand-purple/10 rounded-md transition-all text-muted hover:text-brand-purple">
-                        <ChevronRight size={14} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                      <div>
+                        <p className="font-bold">{lead.name}</p>
+                        <p className="text-[9px] text-muted">{lead.phone}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <span className={cn(
+                      "px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest",
+                      columns.find(c => c.id === lead.status)?.dot.replace('bg-', 'bg-opacity-10 text-')
+                    )}>
+                      {columns.find(c => c.id === lead.status)?.title}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2.5 font-bold text-emerald-500">{lead.budget}</td>
+                  <td className="px-4 py-2.5 text-muted">{lead.agent}</td>
+                  <td className="px-4 py-2.5 text-right">
+                    <button className="p-1.5 hover:bg-brand-purple/10 rounded-md transition-all text-muted hover:text-brand-purple">
+                      <ChevronRight size={14} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

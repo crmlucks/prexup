@@ -81,5 +81,9 @@ input, select, textarea {
 /* Primary Border Utility */
 .border-primary-brand {
   border-color: var(--brand-purple) !important;
-  border-width: 1px;
+  border-width: 0.5px; /* Más delgado */
+}
+
+.border-thin {
+  border-width: 0.5px !important;
 }
