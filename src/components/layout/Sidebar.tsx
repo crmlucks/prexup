@@ -14,7 +14,8 @@ import {
   LogOut,
   Moon,
   Sun,
-  TrendingUp
+  TrendingUp,
+  Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -34,6 +35,7 @@ export const Sidebar = () => {
     { name: 'Dashboard', icon: LayoutDashboard, href: '/' },
     { name: 'Clientes CRM', icon: Users, href: '/crm' },
     { name: 'Chat AI', icon: MessageSquare, href: '/chat' },
+    { name: 'Chatbots', icon: Zap, href: '/chatbots' },
     { name: 'Propiedades', icon: Home, href: '/properties' },
     { name: 'Finanzas', icon: PieChart, href: '/finance' },
     { name: 'Ventas', icon: TrendingUp, href: '/sales' },
