@@ -26,11 +26,11 @@ import { LeadModal } from '@/components/crm/LeadModal';
 import { cn } from '@/lib/utils';
 
 const columns = [
-  { id: 'new', title: 'Nuevos Leads', color: 'border-blue-500', dot: 'bg-blue-500' },
-  { id: 'qualified', title: 'Calificados', color: 'border-purple-500', dot: 'bg-purple-500' },
-  { id: 'proposal', title: 'Propuesta', color: 'border-pink-500', dot: 'bg-pink-500' },
-  { id: 'negotiation', title: 'Negociación', color: 'border-orange-500', dot: 'bg-orange-500' },
-  { id: 'won', title: 'Cerrado Ganado', color: 'border-emerald-500', dot: 'bg-emerald-500' },
+  { id: 'new', title: 'Nuevos Leads', color: 'border-blue-500/30', dot: 'bg-blue-500', divider: 'divider-new' },
+  { id: 'qualified', title: 'Calificados', color: 'border-purple-500/30', dot: 'bg-purple-500', divider: 'divider-qualified' },
+  { id: 'proposal', title: 'Propuesta', color: 'border-pink-500/30', dot: 'bg-pink-500', divider: 'divider-proposal' },
+  { id: 'negotiation', title: 'Negociación', color: 'border-orange-500/30', dot: 'bg-orange-500', divider: 'divider-negotiation' },
+  { id: 'won', title: 'Cerrado Ganado', color: 'border-emerald-500/30', dot: 'bg-emerald-500', divider: 'divider-won' },
 ];
 
 export default function CRMPage() {
@@ -40,20 +40,24 @@ export default function CRMPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    // Simulando carga de datos
-    setTimeout(() => {
-      setLeads([
-        { id: '1', name: 'Sarah Miller', phone: '+1 234 567', status: 'new', budget: '$450k', property: 'Villa Beachfront', agent: 'Alex Morgan', source: 'WhatsApp', time: 'Ahora' },
-        { id: '2', name: 'David Chen', phone: '+1 987 654', status: 'new', budget: '$1.2M', property: 'Penthouse', agent: 'Sarah Connor', source: 'Facebook', time: '5m' },
-        { id: '3', name: 'Juan Perez', phone: '+57 300...', status: 'qualified', budget: '$50k', property: 'Penthouse Downtown', agent: 'Sarah Connor', source: 'Facebook', time: '1h' },
-      ]);
-      setLoading(false);
-    }, 500);
+    fetch('/api/leads')
+      .then(res => res.json())
+      .then(data => {
+        setLeads(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLeads([
+          { id: '1', name: 'Sarah Miller', phone: '+1 234 567', status: 'new', budget: '450,000', property: 'Villa Beachfront', agent: 'Alex Morgan', source: 'WhatsApp', time: 'Ahora' },
+          { id: '2', name: 'David Chen', phone: '+1 987 654', status: 'new', budget: '1,200,000', property: 'Penthouse', agent: 'Sarah Connor', source: 'Facebook', time: '5m' },
+          { id: '3', name: 'Juan Perez', phone: '+57 300...', status: 'qualified', budget: '50,000', property: 'Penthouse Downtown', agent: 'Sarah Connor', source: 'Facebook', time: '1h' },
+        ]);
+        setLoading(false);
+      });
   }, []);
 
   const onDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
-
     if (!destination) return;
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
@@ -74,11 +78,10 @@ export default function CRMPage() {
         onSave={handleAddLead} 
       />
 
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold font-outfit tracking-tight">Embudo de Ventas</h1>
-          <p className="text-muted text-[11px] mt-0.5">Gestiona tus prospectos con precisión.</p>
+          <p className="text-muted text-[11px] mt-0.5">Gestión visual de prospectos.</p>
         </div>
         
         <div className="flex items-center gap-2">
@@ -105,8 +108,8 @@ export default function CRMPage() {
               <div key={col.id} className="flex-shrink-0 w-64 flex flex-col">
                 <div className="flex items-center justify-between mb-3 px-2">
                   <div className="flex items-center gap-2">
-                    <div className={cn("w-1.5 h-1.5 rounded-full", col.dot)} />
-                    <h3 className="font-black text-[10px] text-foreground uppercase tracking-widest">{col.title}</h3>
+                    <div className={cn("w-1 h-1 rounded-full", col.dot)} />
+                    <h3 className="font-black text-[10px] text-foreground uppercase tracking-widest opacity-80">{col.title}</h3>
                     <span className="text-[9px] text-muted bg-foreground/5 px-1.5 py-0.5 rounded-md font-bold">
                       {leads.filter(l => l.status === col.id).length}
                     </span>
@@ -119,8 +122,8 @@ export default function CRMPage() {
                       {...provided.droppableId}
                       ref={provided.innerRef}
                       className={cn(
-                        "flex-1 space-y-3 p-2 bg-foreground/[0.01] rounded-xl border border-thin transition-colors min-h-[150px]",
-                        snapshot.isDraggingOver ? "bg-foreground/[0.03] border-brand-purple/40" : "border-card-border"
+                        "flex-1 space-y-3 p-2 bg-foreground/[0.005] rounded-xl border-deep transition-all min-h-[200px]",
+                        snapshot.isDraggingOver && "bg-foreground/[0.02] border-brand-purple/20"
                       )}
                     >
                       {leads.filter(l => l.status === col.id).map((lead, index) => (
@@ -132,25 +135,28 @@ export default function CRMPage() {
                               {...provided.dragHandleProps}
                               className={cn(
                                 "glass p-3 rounded-lg border-thin transition-all group relative",
-                                col.color, // Color del borde igual al pipeline
-                                snapshot.isDragging && "shadow-2xl rotate-2 scale-105 z-50 border-brand-purple"
+                                col.color,
+                                snapshot.isDragging ? "shadow-2xl z-50 border-brand-purple/50" : ""
                               )}
                             >
                               <div className="flex justify-between items-start mb-2">
                                 <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-foreground/5 text-muted">
                                   {lead.source}
                                 </span>
-                                <GripHorizontal size={12} className="text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <GripHorizontal size={10} className="text-muted opacity-40 group-hover:opacity-100 transition-opacity" />
                               </div>
                               
                               <h4 className="font-bold text-[12px] mb-0.5 tracking-tight">{lead.name}</h4>
                               <p className="text-[10px] text-muted leading-tight truncate">
                                 {lead.property} <br />
-                                <span className="text-[9px] opacity-70 italic">{lead.agent}</span>
+                                <span className="text-[9px] opacity-60 italic">{lead.agent}</span>
                               </p>
                               
-                              <div className="flex items-center justify-between pt-2 mt-3 border-t border-card-border">
-                                <div className="flex items-center text-[10px] font-black text-emerald-500">
+                              {/* Línea Divisora con Color de Etapa */}
+                              <div className={cn("w-full h-[0.5px] mt-3 mb-2", col.divider)} />
+                              
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center text-[11px] font-black text-emerald-500">
                                   <DollarSign size={10} className="mr-0.5" />
                                   {lead.budget}
                                 </div>
@@ -167,7 +173,7 @@ export default function CRMPage() {
                       
                       <button 
                         onClick={() => setIsModalOpen(true)}
-                        className="w-full py-1.5 border border-dashed border-card-border rounded-lg text-[9px] text-muted hover:text-foreground hover:border-brand-purple/40 transition-all uppercase tracking-widest font-black"
+                        className="w-full py-2 border border-dashed border-white/[0.05] rounded-lg text-[9px] text-muted hover:text-foreground hover:border-brand-purple/20 transition-all uppercase tracking-widest font-black"
                       >
                         + Añadir Lead
                       </button>
@@ -179,7 +185,7 @@ export default function CRMPage() {
           </div>
         </DragDropContext>
       ) : (
-        <div className="glass rounded-xl overflow-hidden border border-primary-brand">
+        <div className="glass rounded-xl overflow-hidden border border-deep">
           <table className="w-full text-left">
             <thead className="bg-foreground/[0.02] border-b border-primary-subtle">
               <tr className="text-[10px] text-muted uppercase tracking-widest font-black">

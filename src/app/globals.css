@@ -92,3 +92,15 @@ input, select, textarea {
 .border-thin {
   border-width: 0.5px !important;
 }
+
+.border-deep {
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  border-width: 0.5px;
+}
+
+/* Colores de divisores por etapa */
+.divider-new { background-color: rgba(59, 130, 246, 0.3) !important; }
+.divider-qualified { background-color: rgba(168, 85, 247, 0.3) !important; }
+.divider-proposal { background-color: rgba(236, 72, 153, 0.3) !important; }
+.divider-negotiation { background-color: rgba(249, 115, 22, 0.3) !important; }
+.divider-won { background-color: rgba(16, 185, 129, 0.3) !important; }
