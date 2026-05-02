@@ -82,7 +82,7 @@ export default function CRMPage() {
         </div>
         
         <div className="flex items-center gap-2">
-          <div className="flex p-0.5 bg-foreground/5 rounded-lg border border-card-border mr-2">
+          <div className="flex p-0.5 bg-foreground/5 rounded-lg border border-primary-brand mr-2">
             <button onClick={() => setView('kanban')} className={cn("p-1.5 rounded-md transition-all", view === 'kanban' ? "bg-background shadow-sm text-brand-purple" : "text-muted")}>
               <LayoutGrid size={14} />
             </button>
@@ -179,9 +179,9 @@ export default function CRMPage() {
           </div>
         </DragDropContext>
       ) : (
-        <div className="glass rounded-xl overflow-hidden border border-thin">
+        <div className="glass rounded-xl overflow-hidden border border-primary-brand">
           <table className="w-full text-left">
-            <thead className="bg-foreground/[0.02] border-b border-card-border">
+            <thead className="bg-foreground/[0.02] border-b border-primary-subtle">
               <tr className="text-[10px] text-muted uppercase tracking-widest font-black">
                 <th className="px-4 py-3">Nombre</th>
                 <th className="px-4 py-3">Estado</th>
@@ -192,7 +192,7 @@ export default function CRMPage() {
             </thead>
             <tbody className="text-[11px]">
               {leads.map((lead) => (
-                <tr key={lead.id} className="border-b border-card-border last:border-0 hover:bg-foreground/[0.01] transition-all">
+                <tr key={lead.id} className="border-b border-primary-subtle last:border-0 hover:bg-foreground/[0.01] transition-all">
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-foreground/5 flex items-center justify-center text-muted">
