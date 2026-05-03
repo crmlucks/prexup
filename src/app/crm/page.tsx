@@ -76,6 +76,27 @@ export default function CRMPage() {
     setIsModalOpen(true);
   };
 
+  const handleMoveLead = async (leadId: number, newStatus: string) => {
+    // Actualización optimista (UI primero para que sea instantáneo)
+    const originalLeads = [...leads];
+    setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
+
+    try {
+      const leadToUpdate = originalLeads.find(l => l.id === leadId);
+      const res = await fetch('/api/leads', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...leadToUpdate, status: newStatus })
+      });
+
+      if (!res.ok) throw new Error('Error al mover');
+      showToast('Estado actualizado', 'success');
+    } catch (err) {
+      setLeads(originalLeads); // Revertir si falla
+      showToast('Error al sincronizar movimiento', 'error');
+    }
+  };
+
   const KanbanView = () => (
     <div className="flex gap-6 overflow-x-auto pb-6 h-[calc(100vh-250px)] custom-scrollbar">
       {columns.map((col) => (
@@ -90,31 +111,42 @@ export default function CRMPage() {
             </div>
           </div>
 
-          <div className={cn(
-            "flex-1 space-y-4 p-3 rounded-3xl border transition-all duration-500",
-            col.id === 'new' ? "border-blue-500/20 bg-blue-500/[0.02]" :
-            col.id === 'contacted' ? "border-purple-500/20 bg-purple-500/[0.02]" :
-            col.id === 'qualified' ? "border-amber-500/20 bg-amber-500/[0.02]" :
-            col.id === 'proposal' ? "border-emerald-500/20 bg-emerald-500/[0.02]" :
-            "border-brand-purple/20 bg-brand-purple/[0.02]"
-          )}>
+          <div 
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              const leadId = e.dataTransfer.getData("leadId");
+              handleMoveLead(parseInt(leadId), col.id);
+            }}
+            className={cn(
+              "flex-1 space-y-4 p-3 rounded-3xl border transition-all duration-500 min-h-[500px]",
+              col.id === 'new' ? "border-blue-500/20 bg-blue-500/[0.02]" :
+              col.id === 'contacted' ? "border-purple-500/20 bg-purple-500/[0.02]" :
+              col.id === 'qualified' ? "border-amber-500/20 bg-amber-500/[0.02]" :
+              col.id === 'proposal' ? "border-emerald-500/20 bg-emerald-500/[0.02]" :
+              "border-brand-purple/20 bg-brand-purple/[0.02]"
+            )}
+          >
             {leads
               .filter((lead) => lead.status === col.id)
               .map((lead) => (
                 <motion.div 
                   key={lead.id}
+                  draggable
+                  onDragStart={(e) => e.dataTransfer.setData("leadId", lead.id.toString())}
                   layoutId={lead.id.toString()}
-                  className="glass p-5 rounded-2xl border-thin shadow-sm hover:shadow-xl hover:border-brand-purple/30 transition-all cursor-grab active:cursor-grabbing bg-black/20 group"
+                  className="glass p-5 rounded-2xl border-thin shadow-sm hover:shadow-xl hover:border-brand-purple/30 transition-all cursor-grab active:cursor-grabbing bg-black/20 group relative overflow-hidden"
                 >
+                  {/* Indicador de arrastre */}
+                  <div className="absolute top-0 left-0 w-1 h-full bg-brand-purple/30 group-hover:bg-brand-purple transition-all" />
+                  
                   <div className="flex justify-between items-start mb-3">
                     <span className="text-[9px] font-black uppercase tracking-widest text-brand-purple bg-brand-purple/10 px-2 py-0.5 rounded-md">{lead.source || 'WHATSAPP'}</span>
                     <button className="text-muted hover:text-foreground"><MoreVertical size={14} /></button>
                   </div>
                   
-                  <h4 className="font-bold text-[14px] mb-1 text-foreground leading-tight">{lead.name}</h4>
+                  <h4 className="font-bold text-[14px] mb-1 text-white/90 leading-tight">{lead.name}</h4>
                   <p className="text-[11px] text-muted mb-1 font-medium">{lead.project_interest}</p>
                   
-                  {/* TELÉFONO VISIBLE */}
                   <div className="flex items-center gap-2 text-brand-purple font-bold mb-4">
                     <Phone size={12} />
                     <span className="text-[12px]">{lead.phone}</span>
@@ -125,29 +157,10 @@ export default function CRMPage() {
                        <span className="text-[13px] font-black text-emerald-500">${lead.budget || '0'} <span className="text-[9px] opacity-60">{lead.currency}</span></span>
                     </div>
                     
-                    {/* BOTONES DE ACCIÓN VISIBLES */}
                     <div className="flex items-center gap-1.5">
-                      <button 
-                        onClick={() => handleEdit(lead)} 
-                        title="Editar Lead"
-                        className="p-2 rounded-xl bg-foreground/5 hover:bg-brand-purple/10 text-muted hover:text-brand-purple transition-all"
-                      >
-                        <Edit2 size={14} />
-                      </button>
-                      <Link 
-                        href="/chat" 
-                        title="Ir al Chat"
-                        className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 hover:scale-110 transition-all"
-                      >
-                        <MessageCircle size={14} />
-                      </Link>
-                      <button 
-                        onClick={() => handleDelete(lead.id)} 
-                        title="Eliminar"
-                        className="p-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      <button onClick={() => handleEdit(lead)} className="p-2 rounded-xl bg-foreground/5 hover:bg-brand-purple/10 text-muted hover:text-brand-purple transition-all"><Edit2 size={14} /></button>
+                      <Link href="/chat" className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 hover:scale-110 transition-all"><MessageCircle size={14} /></Link>
+                      <button onClick={() => handleDelete(lead.id)} className="p-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all"><Trash2 size={14} /></button>
                     </div>
                   </div>
                 </motion.div>
@@ -252,7 +265,7 @@ export default function CRMPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
              <h1 className="text-2xl font-black font-outfit tracking-tight">CRM PrexUp</h1>
-             <span className="bg-brand-purple/20 text-brand-purple text-[9px] font-black px-2 py-0.5 rounded-md border border-brand-purple/30 uppercase tracking-widest">v1.6 AESTHETIC</span>
+              <span className="bg-brand-purple/20 text-brand-purple text-[9px] font-black px-2 py-0.5 rounded-md border border-brand-purple/30 uppercase tracking-widest">v1.7 DRAG & DROP</span>
           </div>
           <p className="text-muted text-[11px] font-medium uppercase tracking-wider">Gestión de Pipeline en tiempo real</p>
         </div>
