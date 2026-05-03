@@ -9,23 +9,34 @@ const dbConfig = {
   database: process.env.DB_DATABASE || 'default'
 };
 
+const EVO_URL = process.env.EVOLUTION_API_URL;
+const EVO_KEY = process.env.EVOLUTION_API_KEY;
+const EVO_INSTANCE = process.env.EVOLUTION_INSTANCE || 'PrexUp';
+
 export async function POST(req: Request) {
   try {
-    const { phone, text, instance, serverUrl, apiKey } = await req.json();
+    const { phone, text } = await req.json();
 
-    if (!phone || !text || !serverUrl || !apiKey) {
-      return NextResponse.json({ error: 'Faltan parámetros de envío' }, { status: 400 });
+    if (!phone || !text) {
+      return NextResponse.json({ error: 'Faltan parámetros: phone o text' }, { status: 400 });
     }
 
-    // 1. Enviar el mensaje a través de Evolution API en el VPS
-    const evolutionResponse = await fetch(`${serverUrl}/message/sendText/${instance}`, {
+    if (!EVO_URL || !EVO_KEY) {
+      return NextResponse.json({ error: 'Configuración de Evolution API no encontrada en el servidor' }, { status: 500 });
+    }
+
+    // 1. Limpiar el número de teléfono (solo números)
+    const cleanPhone = phone.replace(/\D/g, '');
+
+    // 2. Enviar el mensaje a través de Evolution API
+    const response = await fetch(`${EVO_URL}/message/sendText/${EVO_INSTANCE}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': apiKey
+        'apikey': EVO_KEY
       },
       body: JSON.stringify({
-        number: phone,
+        number: cleanPhone,
         options: {
           delay: 1200,
           presence: "composing",
@@ -37,13 +48,13 @@ export async function POST(req: Request) {
       })
     });
 
-    const evoData = await evolutionResponse.json();
+    const evoData = await response.json();
 
-    // 2. Guardar el mensaje enviado en nuestra MariaDB
+    // 3. Guardar el mensaje enviado en nuestra MariaDB
     const connection = await mysql.createConnection(dbConfig);
     await connection.execute(
       'INSERT INTO chat_messages (sender_id, message_text, is_from_me, timestamp) VALUES (?, ?, ?, NOW())',
-      [phone, text, 1] // 1 significa que lo envié yo
+      [cleanPhone, text, 1]
     );
     await connection.end();
 

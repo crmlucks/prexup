@@ -13,7 +13,8 @@ import {
   ChevronLeft,
   User,
   MoreHorizontal,
-  Loader2
+  Loader2,
+  MessageCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -29,21 +30,18 @@ export default function ChatPage() {
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Cargar contactos al inicio
   useEffect(() => {
     fetchContacts();
-    const interval = setInterval(fetchContacts, 10000); // Polling cada 10s
+    const interval = setInterval(fetchContacts, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  // Cargar mensajes cuando cambia el chat seleccionado
   useEffect(() => {
     if (selectedChat) {
       fetchMessages(selectedChat.phone);
     }
   }, [selectedChat]);
 
-  // Scroll al final cuando llegan mensajes
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -81,20 +79,12 @@ export default function ChatPage() {
     setInputText('');
 
     try {
-      // Estos valores vendrían de tu configuración guardada en la DB/localStorage
-      const config = {
-        instance: 'PrexUp_Main',
-        serverUrl: 'https://tu-vps.com', // Esto debe ser dinámico desde tu configuración
-        apiKey: 'tu_api_key'
-      };
-
       const response = await fetch('/api/chat/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           phone: selectedChat.phone,
-          text: messageContent,
-          ...config
+          text: messageContent
         })
       });
 
@@ -102,9 +92,10 @@ export default function ChatPage() {
 
       if (data.success) {
         fetchMessages(selectedChat.phone);
+        showToast('Mensaje enviado', 'success');
       } else {
-        showToast('Error al enviar WhatsApp', 'error');
-        setInputText(messageContent); // Devolver el texto si falló
+        showToast(data.error || 'Error al enviar WhatsApp', 'error');
+        setInputText(messageContent);
       }
     } catch (error) {
       showToast('Error de conexión', 'error');
@@ -137,6 +128,7 @@ export default function ChatPage() {
             <div className="p-10 flex justify-center"><Loader2 className="animate-spin text-brand-purple" /></div>
           ) : contacts.length === 0 ? (
             <div className="p-10 text-center opacity-40">
+              <MessageCircle size={32} className="mx-auto mb-2" />
               <p className="text-[10px] font-bold uppercase tracking-widest">Sin conversaciones</p>
             </div>
           ) : (
@@ -179,7 +171,6 @@ export default function ChatPage() {
       <div className="flex-1 flex flex-col bg-foreground/[0.005]">
         {selectedChat ? (
           <>
-            {/* Header de Chat */}
             <div className="p-3 border-b border-deep flex items-center justify-between bg-foreground/[0.01]">
               <div className="flex items-center gap-3">
                 <button className="md:hidden p-1 text-muted"><ChevronLeft /></button>
@@ -188,7 +179,7 @@ export default function ChatPage() {
                 </div>
                 <div>
                   <h3 className="font-bold text-[13px] leading-tight">{selectedChat.name || selectedChat.phone}</h3>
-                  <p className="text-[10px] text-emerald-500 font-medium">Chat Activo</p>
+                  <p className="text-[10px] text-emerald-500 font-medium">Conectado vía Evolution</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -197,8 +188,7 @@ export default function ChatPage() {
               </div>
             </div>
 
-            {/* Mensajes */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-[url('https://w0.peakpx.com/wallpaper/508/606/HD-whatsapp-dark-background.jpg')] bg-repeat bg-contain bg-opacity-5">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((msg) => (
                 <div key={msg.id} className={cn("flex", msg.is_from_me ? "justify-end" : "justify-start")}>
                   <div className={cn(
@@ -217,7 +207,6 @@ export default function ChatPage() {
               ))}
             </div>
 
-            {/* Input de Mensaje */}
             <div className="p-4 bg-foreground/[0.01] border-t border-deep">
               <form onSubmit={handleSendMessage} className="flex items-center gap-3">
                 <div className="flex gap-1">
@@ -249,13 +238,12 @@ export default function ChatPage() {
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center opacity-20">
             <MessageCircle size={80} className="mb-4" />
-            <p className="text-sm font-black uppercase tracking-widest">Selecciona un cliente para chatear</p>
+            <p className="text-sm font-black uppercase tracking-widest text-center">
+              Selecciona un cliente para iniciar<br/>la conversación vía WhatsApp
+            </p>
           </div>
         )}
       </div>
     </div>
   );
 }
-
-// Icono faltante
-import { MessageCircle } from 'lucide-react';
