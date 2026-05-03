@@ -173,52 +173,75 @@ export default function CRMPage() {
   );
 
   const ListView = () => (
-    <div className="glass rounded-3xl overflow-hidden border-thin bg-background/40">
-      <table className="w-full text-left border-collapse">
-        <thead>
-          <tr className="bg-foreground/[0.03] border-b border-deep text-[10px] font-black uppercase tracking-widest text-muted">
-            <th className="p-5">Lead / Origen</th>
-            <th className="p-5">Contacto</th>
-            <th className="p-5">Proyecto</th>
-            <th className="p-5">Estado</th>
-            <th className="p-5 text-right">Acciones de Seguimiento</th>
-          </tr>
-        </thead>
-        <tbody className="text-[12px]">
-          {leads.map((lead) => (
-            <tr key={lead.id} className="border-b border-deep hover:bg-foreground/[0.02] transition-all">
-              <td className="p-5">
-                <div className="font-bold text-[13px]">{lead.name}</div>
-                <div className="text-[9px] font-black text-brand-purple uppercase tracking-widest mt-0.5">{lead.source}</div>
-              </td>
-              <td className="p-5">
-                <div className="flex flex-col gap-0.5">
-                   <span className="font-bold text-foreground/90">{lead.phone}</span>
-                   <span className="text-[11px] text-muted">{lead.email || 'Sin correo'}</span>
-                </div>
-              </td>
-              <td className="p-5 font-bold text-foreground/80">{lead.project_interest}</td>
-              <td className="p-5">
-                <span className={cn(
-                  "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest inline-block shadow-sm",
-                  columns.find(c => c.id === lead.status)?.color.replace('bg-', 'text-').replace('500', '600') || 'text-gray-500',
-                  "bg-white/10"
-                )}>
-                  {columns.find(c => c.id === lead.status)?.title || lead.status}
-                </span>
-              </td>
-              <td className="p-5">
-                <div className="flex items-center justify-end gap-3">
-                  <a href={`tel:${lead.phone}`} title="Llamar ahora" className="p-2.5 rounded-2xl bg-blue-500/10 text-blue-500 hover:scale-110 transition-all border border-blue-500/20"><Phone size={16} /></a>
-                  <Link href="/chat" title="Chat WhatsApp" className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-500 hover:scale-110 transition-all border border-emerald-500/20"><MessageCircle size={16} /></Link>
-                  <button onClick={() => handleEdit(lead)} title="Editar Lead" className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-500 hover:scale-110 transition-all border border-amber-500/20"><Edit2 size={16} /></button>
-                  <button onClick={() => handleDelete(lead.id)} title="Eliminar" className="p-2.5 rounded-2xl bg-red-500/10 text-red-500 hover:scale-110 transition-all border border-red-500/20"><Trash2 size={16} /></button>
-                </div>
-              </td>
+    <div className="glass rounded-3xl overflow-hidden border border-white/5 bg-black/20 shadow-2xl animate-in fade-in slide-in-from-bottom-4">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-white/5 border-b border-white/5 text-[10px] font-black uppercase tracking-widest text-muted/60">
+              <th className="p-5">Lead / Origen</th>
+              <th className="p-5">Información de Contacto</th>
+              <th className="p-5">Proyecto / Interés</th>
+              <th className="p-5">Etapa Actual</th>
+              <th className="p-5 text-right">Acciones de Seguimiento</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="text-[12px]">
+            {leads.map((lead) => (
+              <tr key={lead.id} className="border-b border-white/5 hover:bg-white/[0.03] transition-all group">
+                <td className="p-5">
+                  <div className="font-bold text-[14px] text-white/90">{lead.name}</div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[9px] font-black text-brand-purple bg-brand-purple/10 px-2 py-0.5 rounded uppercase tracking-widest border border-brand-purple/20">
+                      {lead.source}
+                    </span>
+                  </div>
+                </td>
+                <td className="p-5">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2 text-white/80 font-bold">
+                      <Phone size={12} className="text-brand-purple" />
+                      {lead.phone}
+                    </div>
+                    <div className="text-[11px] text-muted font-medium ml-5">{lead.email || 'Sin correo'}</div>
+                  </div>
+                </td>
+                <td className="p-5 font-bold text-white/70">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-brand-purple/40" />
+                    {lead.project_interest}
+                  </div>
+                </td>
+                <td className="p-5">
+                  <span className={cn(
+                    "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-2 shadow-sm border border-white/5",
+                    columns.find(c => c.id === lead.status)?.color.replace('bg-', 'text-').replace('500', '600') || 'text-gray-400',
+                    "bg-white/5"
+                  )}>
+                    <div className={cn("w-1.5 h-1.5 rounded-full", columns.find(c => c.id === lead.status)?.color || 'bg-gray-400')} />
+                    {columns.find(c => c.id === lead.status)?.title || lead.status}
+                  </span>
+                </td>
+                <td className="p-5">
+                  <div className="flex items-center justify-end gap-2.5">
+                    <a href={`tel:${lead.phone}`} title="Llamar" className="p-2.5 rounded-2xl bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 hover:scale-110 transition-all border border-blue-500/20">
+                      <Phone size={16} />
+                    </a>
+                    <Link href="/chat" title="Chat WhatsApp" className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 hover:scale-110 transition-all border border-emerald-500/20">
+                      <MessageCircle size={16} />
+                    </Link>
+                    <button onClick={() => handleEdit(lead)} title="Editar" className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 hover:scale-110 transition-all border border-amber-500/20">
+                      <Edit2 size={16} />
+                    </button>
+                    <button onClick={() => handleDelete(lead.id)} title="Eliminar" className="p-2.5 rounded-2xl bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:scale-110 transition-all border border-red-500/20">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 
