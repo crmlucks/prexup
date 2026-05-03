@@ -12,16 +12,27 @@ import {
   CheckCheck,
   Phone,
   Video,
-  ChevronLeft,
   User,
   MoreHorizontal,
   Loader2,
   MessageCircle,
-  RefreshCw
+  RefreshCw,
+  Image as ImageIcon,
+  FileText,
+  Zap,
+  X,
+  Download
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/Toast';
+
+const QUICK_RESPONSES = [
+  { id: 1, text: "¡Hola! Gracias por contactar a PrexUp. ¿En qué proyecto estás interesado?" },
+  { id: 2, text: "Te adjunto el catálogo de propiedades disponibles para este mes." },
+  { id: 3, text: "Excelente, agendemos una visita para que puedas conocer el proyecto." },
+  { id: 4, text: "Nuestras opciones de financiamiento incluyen crédito directo." }
+];
 
 export default function ChatPage() {
   const { showToast } = useToast();
@@ -31,11 +42,11 @@ export default function ChatPage() {
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [showQuickRes, setShowQuickRes] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchContacts();
-    // Auto-refresh cada 15 segundos para ver nuevos mensajes
     const interval = setInterval(fetchContacts, 15000);
     return () => clearInterval(interval);
   }, []);
@@ -56,9 +67,7 @@ export default function ChatPage() {
     try {
       const res = await fetch('/api/chat/contacts');
       const data = await res.json();
-      if (Array.isArray(data)) {
-        setContacts(data);
-      }
+      if (Array.isArray(data)) setContacts(data);
     } catch (err) {
       console.error('Error fetching contacts');
     } finally {
@@ -76,99 +85,87 @@ export default function ChatPage() {
     }
   };
 
-  const handleSendMessage = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!inputText.trim() || !selectedChat || sending) return;
+  const handleSendMessage = async (textToSend: string) => {
+    if (!textToSend.trim() || !selectedChat || sending) return;
 
-    const messageContent = inputText;
-    setInputText('');
     setSending(true);
-
     try {
       const response = await fetch('/api/chat/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           phone: selectedChat.phone,
-          text: messageContent
+          text: textToSend
         })
       });
 
       const data = await response.json();
-
       if (data.success) {
-        // Refrescar mensajes inmediatamente
         fetchMessages(selectedChat.phone);
-        // Actualizar último mensaje en la lista lateral
-        setContacts(prev => prev.map(c => 
-          c.phone === selectedChat.phone ? { ...c, lastMsg: messageContent, time: new Date() } : c
-        ));
+        setInputText('');
+        setShowQuickRes(false);
       } else {
-        showToast(data.error || 'Error al enviar WhatsApp', 'error');
-        setInputText(messageContent); // Devolver el texto si falló
+        showToast(data.error || 'Error al enviar', 'error');
       }
     } catch (error) {
       showToast('Error de conexión', 'error');
-      setInputText(messageContent);
     } finally {
       setSending(false);
     }
   };
 
+  const handleFileUpload = () => {
+    showToast('Función de carga de archivos vinculando con Evolution...', 'info');
+  };
+
   return (
-    <div className="h-[calc(100vh-100px)] flex glass rounded-2xl overflow-hidden border-deep animate-fade-in shadow-2xl">
-      {/* Sidebar de Leads */}
-      <div className="w-full md:w-80 border-r border-deep flex flex-col bg-foreground/[0.01]">
-        <div className="p-4 border-b border-deep">
+    <div className="h-[calc(100vh-100px)] flex glass rounded-3xl overflow-hidden border-deep animate-fade-in shadow-2xl bg-background/20">
+      {/* Sidebar de Contactos */}
+      <div className="w-full md:w-80 border-r border-white/5 flex flex-col bg-black/20">
+        <div className="p-5 border-b border-white/5">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold font-outfit tracking-tight">Chat de Leads</h1>
-            <button onClick={fetchContacts} className="p-1.5 rounded-lg glass-hover text-brand-purple">
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            <h1 className="text-xl font-black font-outfit tracking-tight text-white/90">Mensajería</h1>
+            <button onClick={fetchContacts} className="p-2 rounded-xl glass-hover text-brand-purple">
+              <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
             </button>
           </div>
           <div className="relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
             <input 
               type="text" 
-              placeholder="Buscar por nombre o celular..." 
-              className="w-full pl-9 pr-3 py-1.5 rounded-lg text-[11px] bg-foreground/5 border-thin focus:outline-none focus:border-brand-purple/40"
+              placeholder="Buscar conversación..." 
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl text-[12px] bg-white/5 border-thin focus:border-brand-purple/40 outline-none"
             />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
           {loading && contacts.length === 0 ? (
             <div className="p-10 flex justify-center"><Loader2 className="animate-spin text-brand-purple" /></div>
-          ) : contacts.length === 0 ? (
-            <div className="p-10 text-center opacity-40">
-              <User size={32} className="mx-auto mb-2 text-muted" />
-              <p className="text-[10px] font-black uppercase tracking-widest">No hay leads registrados</p>
-              <p className="text-[9px] mt-1">Crea un lead en el CRM para verlo aquí</p>
-            </div>
           ) : (
             contacts.map((chat) => (
               <div 
                 key={chat.phone}
                 onClick={() => setSelectedChat(chat)}
                 className={cn(
-                  "p-4 flex gap-3 cursor-pointer transition-all border-b border-white/[0.02]",
-                  selectedChat?.phone === chat.phone ? "bg-brand-purple/10 border-l-2 border-l-brand-purple shadow-inner" : "hover:bg-foreground/[0.02]"
+                  "p-4 flex gap-3 cursor-pointer transition-all border-b border-white/[0.02] group",
+                  selectedChat?.phone === chat.phone ? "bg-brand-purple/10 border-l-4 border-l-brand-purple shadow-inner" : "hover:bg-white/[0.03]"
                 )}
               >
                 <div className="relative">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-purple/20 to-brand-blue/20 flex items-center justify-center border-thin">
-                    <span className="text-[14px] font-bold text-brand-purple">{(chat.name || 'U').charAt(0)}</span>
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-purple/20 to-brand-blue/20 flex items-center justify-center border-thin">
+                    <span className="text-[16px] font-black text-brand-purple">{(chat.name || 'U').charAt(0)}</span>
                   </div>
-                  <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-background" />
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-4 border-[#0a0a0a]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start mb-0.5">
-                    <h3 className="font-bold text-[12px] truncate">{chat.name || chat.phone}</h3>
-                    <span className="text-[8px] font-medium text-muted">
+                  <div className="flex justify-between items-start mb-1">
+                    <h3 className="font-bold text-[13px] truncate text-white/90">{chat.name || chat.phone}</h3>
+                    <span className="text-[9px] font-black text-muted/60 uppercase">
                       {chat.time ? new Date(chat.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                     </span>
                   </div>
-                  <p className="text-[10px] text-muted truncate italic pr-4">
+                  <p className="text-[11px] text-muted truncate pr-4 group-hover:text-white/60 transition-colors">
                     {chat.lastMsg}
                   </p>
                 </div>
@@ -178,93 +175,141 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Área de Conversación */}
-      <div className="flex-1 flex flex-col bg-foreground/[0.005]">
+      {/* Área de Chat */}
+      <div className="flex-1 flex flex-col relative">
         {selectedChat ? (
           <>
-            <div className="p-3 border-b border-deep flex items-center justify-between bg-foreground/[0.01]">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-brand-purple/10 flex items-center justify-center border-thin">
+            {/* Header */}
+            <div className="p-4 border-b border-white/5 flex items-center justify-between bg-black/30 backdrop-blur-md z-10">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-brand-purple/10 flex items-center justify-center border-thin">
                   <User size={20} className="text-brand-purple" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-[13px] leading-tight">{selectedChat.name || selectedChat.phone}</h3>
-                  <div className="flex items-center gap-1.5 mt-0.5">
+                  <h3 className="font-bold text-[14px] text-white/90 leading-tight">{selectedChat.name || selectedChat.phone}</h3>
+                  <div className="flex items-center gap-2 mt-1">
                     <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                    <p className="text-[9px] text-muted font-bold uppercase tracking-wider">Lead Directo • WhatsApp</p>
+                    <p className="text-[9px] text-emerald-500 font-black uppercase tracking-[0.2em]">En línea • WhatsApp</p>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-1">
-                <button className="p-2.5 text-muted hover:text-brand-purple transition-all bg-foreground/5 rounded-xl mr-1"><Phone size={16} /></button>
-                <button className="p-2.5 text-muted hover:text-brand-purple transition-all bg-foreground/5 rounded-xl"><MoreHorizontal size={16} /></button>
+              <div className="flex items-center gap-2">
+                <button className="p-2.5 rounded-xl bg-white/5 text-muted hover:text-brand-purple transition-all border border-white/5"><Phone size={18} /></button>
+                <button className="p-2.5 rounded-xl bg-white/5 text-muted hover:text-brand-purple transition-all border border-white/5"><Video size={18} /></button>
+                <button className="p-2.5 rounded-xl bg-white/5 text-muted hover:text-brand-purple transition-all border border-white/5"><MoreHorizontal size={18} /></button>
               </div>
             </div>
 
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-fixed opacity-90">
-              {messages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center opacity-30">
-                  <MessageCircle size={48} className="mb-2" />
-                  <p className="text-[10px] font-black uppercase tracking-widest">No hay mensajes anteriores</p>
-                  <p className="text-[9px]">Escribe abajo para iniciar el contacto por WhatsApp</p>
-                </div>
-              ) : (
-                messages.map((msg) => (
-                  <div key={msg.id} className={cn("flex", msg.is_from_me ? "justify-end" : "justify-start")}>
-                    <motion.div 
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={cn(
-                        "max-w-[75%] rounded-2xl p-3 shadow-md relative border-thin",
-                        msg.is_from_me 
-                          ? "bg-brand-purple text-white rounded-tr-none border-white/10" 
-                          : "bg-white text-black rounded-tl-none border-gray-100"
-                      )}
-                    >
-                      <p className="text-[11.5px] leading-relaxed font-medium">{msg.message_text}</p>
-                      <div className={cn("flex items-center justify-end gap-1 mt-1.5", msg.is_from_me ? "text-white/60" : "text-muted")}>
-                        <span className="text-[8px] font-bold">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                        {msg.is_from_me && <CheckCheck size={10} className="text-blue-300" />}
+            {/* Mensajes */}
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] bg-fixed opacity-95 custom-scrollbar">
+              {messages.map((msg) => (
+                <div key={msg.id} className={cn("flex", msg.is_from_me ? "justify-end" : "justify-start")}>
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className={cn(
+                      "max-w-[70%] rounded-2xl p-4 shadow-2xl relative border",
+                      msg.is_from_me 
+                        ? "bg-brand-purple text-white rounded-tr-none border-white/10" 
+                        : "bg-black/40 text-white/90 rounded-tl-none border-white/5 backdrop-blur-sm"
+                    )}
+                  >
+                    {/* Render de Multimedia */}
+                    {msg.message_type === 'image' && (
+                      <div className="mb-2 rounded-lg overflow-hidden border border-white/10">
+                         <img src={msg.media_url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=400&q=80'} alt="Media" className="w-full h-auto max-h-60 object-cover" />
                       </div>
-                    </motion.div>
-                  </div>
-                ))
-              )}
+                    )}
+                    {msg.message_type === 'document' && (
+                      <div className="mb-2 flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                        <FileText size={24} className="text-brand-purple" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] font-bold truncate">{msg.message_text || 'Archivo PDF'}</p>
+                          <p className="text-[9px] opacity-60">Documento adjunto</p>
+                        </div>
+                        <Download size={16} className="text-muted" />
+                      </div>
+                    )}
+
+                    <p className="text-[12px] leading-relaxed font-medium">{msg.message_text}</p>
+                    
+                    <div className={cn("flex items-center justify-end gap-1.5 mt-2", msg.is_from_me ? "text-white/40" : "text-muted/40")}>
+                      <span className="text-[9px] font-black uppercase">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      {msg.is_from_me && <CheckCheck size={12} className="text-brand-blue" />}
+                    </div>
+                  </motion.div>
+                </div>
+              ))}
             </div>
 
-            <div className="p-4 bg-background border-t border-deep shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-              <form onSubmit={handleSendMessage} className="flex items-center gap-3">
-                <button type="button" className="p-2.5 text-muted hover:text-brand-purple transition-all bg-foreground/5 rounded-xl"><Smile size={20} /></button>
+            {/* Barra de Entrada */}
+            <div className="p-5 bg-black/40 border-t border-white/5 backdrop-blur-lg">
+              {/* Menu de Respuestas Rápidas */}
+              <AnimatePresence>
+                {showQuickRes && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    className="absolute bottom-[90px] left-5 right-5 bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl z-50"
+                  >
+                    <div className="flex justify-between items-center mb-3 border-b border-white/5 pb-2">
+                      <h4 className="text-[10px] font-black uppercase tracking-widest text-brand-purple flex items-center gap-2">
+                        <Zap size={14} /> Respuestas Rápidas
+                      </h4>
+                      <button onClick={() => setShowQuickRes(false)} className="text-muted"><X size={14} /></button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {QUICK_RESPONSES.map((qr) => (
+                        <button 
+                          key={qr.id}
+                          onClick={() => handleSendMessage(qr.text)}
+                          className="text-left p-3 rounded-xl bg-white/5 hover:bg-brand-purple/10 border border-white/5 hover:border-brand-purple/30 transition-all group"
+                        >
+                          <p className="text-[11px] text-white/70 group-hover:text-white transition-colors line-clamp-1">{qr.text}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(inputText); }} className="flex items-center gap-3">
+                <div className="flex gap-1">
+                  <button type="button" onClick={handleFileUpload} className="p-3 text-muted hover:text-brand-purple transition-all bg-white/5 rounded-2xl border border-white/5"><Paperclip size={20} /></button>
+                  <button type="button" onClick={() => setShowQuickRes(!showQuickRes)} className="p-3 text-muted hover:text-brand-purple transition-all bg-white/5 rounded-2xl border border-white/5"><Zap size={20} /></button>
+                </div>
                 <div className="flex-1 relative">
                   <input 
                     type="text" 
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    placeholder="Escribe un mensaje de WhatsApp para este lead..." 
-                    className="w-full bg-foreground/5 border-thin rounded-2xl px-5 py-3 text-[12px] focus:outline-none focus:border-brand-purple/40 transition-all"
+                    placeholder="Escribe un mensaje de WhatsApp..." 
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-3.5 text-[13px] focus:outline-none focus:border-brand-purple/50 transition-all shadow-inner"
                   />
+                  <button type="button" className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-brand-purple"><Smile size={20} /></button>
                 </div>
                 <button 
                   type="submit" 
                   disabled={sending || !inputText.trim()}
                   className={cn(
-                    "p-3.5 rounded-2xl transition-all shadow-xl disabled:opacity-50 flex items-center justify-center min-w-[50px]",
-                    inputText.trim() ? "bg-brand-purple text-white hover:scale-105 active:scale-95" : "bg-foreground/10 text-muted"
+                    "p-4 rounded-2xl shadow-xl transition-all disabled:opacity-50 flex items-center justify-center min-w-[56px]",
+                    inputText.trim() ? "bg-gradient-brand text-white shadow-brand-purple/30 scale-105" : "bg-white/5 text-muted"
                   )}
                 >
-                  {sending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                  {sending ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
                 </button>
               </form>
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center opacity-10">
-            <div className="p-10 rounded-full bg-foreground/5 mb-6">
-              <MessageCircle size={120} />
+          <div className="flex-1 flex flex-col items-center justify-center opacity-20">
+            <div className="p-12 rounded-full bg-white/5 mb-8 animate-pulse">
+              <MessageCircle size={140} />
             </div>
-            <p className="text-lg font-black uppercase tracking-[0.3em] text-center">
-              Selecciona un Lead<br/>para chatear
-            </p>
+            <h2 className="text-2xl font-black uppercase tracking-[0.4em] text-center text-white">
+              Bandeja de<br/>Entrada
+            </h2>
           </div>
         )}
       </div>

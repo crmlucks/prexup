@@ -18,8 +18,22 @@ export async function GET() {
     
     // 1. Borrado total
     await connection.query("DROP TABLE IF EXISTS leads");
+    await connection.query("DROP TABLE IF EXISTS chat_messages");
     
     // 2. Creación limpia (sin duplicar llaves)
+    // Tabla de Mensajes (Ahora con soporte Multimedia)
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS chat_messages (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        sender_id VARCHAR(50) NOT NULL,
+        message_text TEXT,
+        message_type ENUM('text', 'image', 'video', 'document', 'audio') DEFAULT 'text',
+        media_url TEXT,
+        is_from_me TINYINT(1) DEFAULT 0,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
     const createQuery = `
       CREATE TABLE leads (
         id INT NOT NULL AUTO_INCREMENT,
