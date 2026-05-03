@@ -14,23 +14,23 @@ export async function GET(req: Request) {
   const phone = searchParams.get('phone');
 
   if (!phone) {
-    return NextResponse.json({ error: 'Se requiere el teléfono del cliente' }, { status: 400 });
+    return NextResponse.json({ error: 'Falta el parámetro phone' }, { status: 400 });
   }
 
   try {
     const connection = await mysql.createConnection(dbConfig);
     
-    // Obtener los últimos 50 mensajes de este contacto
-    const [messages] = await connection.execute(
-      'SELECT * FROM chat_messages WHERE sender_id = ? ORDER BY timestamp ASC LIMIT 50',
+    // Obtenemos los mensajes donde el sender_id es el teléfono del lead
+    // (Tanto los enviados por nosotros como los recibidos)
+    const [rows]: any = await connection.execute(
+      'SELECT * FROM chat_messages WHERE sender_id = ? ORDER BY timestamp ASC',
       [phone]
     );
 
     await connection.end();
-    return NextResponse.json(messages);
-
+    return NextResponse.json(rows);
   } catch (error: any) {
-    console.error('❌ Error obteniendo mensajes:', error.message);
+    console.error('❌ Error fetching messages:', error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

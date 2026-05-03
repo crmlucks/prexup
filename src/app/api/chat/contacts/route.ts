@@ -12,28 +12,34 @@ const dbConfig = {
 export async function GET() {
   try {
     const connection = await mysql.createConnection(dbConfig);
-    
-    // Obtener los contactos únicos que tienen mensajes, con el último mensaje y tiempo
-    const [contacts] = await connection.execute(`
+
+    // Buscamos todos los leads y el último mensaje de cada uno si existe
+    // Hacemos un LEFT JOIN con chat_messages para ver quién nos escribió último
+    const [rows]: any = await connection.execute(`
       SELECT 
-        l.name, 
         l.phone, 
-        m.message_text as lastMsg, 
-        m.timestamp as time,
-        (SELECT COUNT(*) FROM chat_messages WHERE sender_id = l.phone AND is_from_me = 0) as unread
+        l.name, 
+        (SELECT message_text FROM chat_messages WHERE sender_id = l.phone OR (is_from_me = 1 AND sender_id = l.phone) ORDER BY timestamp DESC LIMIT 1) as lastMsg,
+        (SELECT timestamp FROM chat_messages WHERE sender_id = l.phone OR (is_from_me = 1 AND sender_id = l.phone) ORDER BY timestamp DESC LIMIT 1) as time,
+        0 as unread
       FROM leads l
-      INNER JOIN chat_messages m ON m.sender_id = l.phone
-      WHERE m.id IN (
-        SELECT MAX(id) FROM chat_messages GROUP BY sender_id
-      )
-      ORDER BY m.timestamp DESC
+      ORDER BY time DESC, l.created_at DESC
     `);
 
     await connection.end();
-    return NextResponse.json(contacts);
 
+    // Formateamos para el frontend
+    const contacts = rows.map((row: any) => ({
+      phone: row.phone,
+      name: row.name,
+      lastMsg: row.lastMsg || 'Sin mensajes aún',
+      time: row.time || null,
+      unread: row.unread || 0
+    }));
+
+    return NextResponse.json(contacts);
   } catch (error: any) {
-    console.error('❌ Error obteniendo contactos:', error.message);
+    console.error('❌ Error fetching contacts:', error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
