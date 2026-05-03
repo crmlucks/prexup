@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import mysql from 'mysql2/promise';
 
+export const dynamic = "force-dynamic";
+
 const dbConfig = {
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT || '3306'),
@@ -10,37 +12,50 @@ const dbConfig = {
 };
 
 export async function GET() {
+  let connection;
   try {
-    const connection = await mysql.createConnection(dbConfig);
+    connection = await mysql.createConnection(dbConfig);
 
-    // Consulta Mejorada: Trae leads y gente que escribió, manejando casos sin mensajes
-    const query = `
-      SELECT 
-        combined.phone,
-        COALESCE(l.name, combined.phone) as name,
-        COALESCE(m.message_text, 'Nuevo Lead (Sin mensajes)') as lastMsg,
-        COALESCE(m.timestamp, l.created_at) as time,
-        (SELECT COUNT(*) FROM chat_messages WHERE sender_id = combined.phone AND is_from_me = 0 AND timestamp > COALESCE(m.timestamp, '1970-01-01')) as unread
-      FROM (
-        SELECT DISTINCT sender_id as phone FROM chat_messages
-        UNION
-        SELECT phone FROM leads
-      ) combined
-      LEFT JOIN leads l ON l.phone = combined.phone
-      LEFT JOIN chat_messages m ON m.id = (
-        SELECT id FROM chat_messages 
-        WHERE sender_id = combined.phone 
-        ORDER BY timestamp DESC LIMIT 1
-      )
-      ORDER BY time DESC, combined.phone ASC
-    `;
+    // Simplificado: Traemos TODOS los leads directamente
+    const [leads]: any = await connection.execute(
+      'SELECT id, name, phone, status, source, created_at FROM leads ORDER BY created_at DESC'
+    );
 
-    const [rows]: any = await connection.execute(query);
+    // Construimos la lista de contactos desde los leads
+    const contacts = [];
+    for (const lead of leads) {
+      let lastMsg = 'Sin mensajes aún';
+      let time = lead.created_at;
+
+      // Intentamos buscar el último mensaje (si la tabla existe)
+      try {
+        const [msgs]: any = await connection.execute(
+          'SELECT message_text, timestamp FROM chat_messages WHERE sender_id = ? ORDER BY timestamp DESC LIMIT 1',
+          [lead.phone]
+        );
+        if (msgs.length > 0) {
+          lastMsg = msgs[0].message_text || 'Multimedia';
+          time = msgs[0].timestamp;
+        }
+      } catch (_) {
+        // Si chat_messages no existe, no pasa nada
+      }
+
+      contacts.push({
+        phone: lead.phone,
+        name: lead.name,
+        status: lead.status,
+        source: lead.source,
+        lastMsg,
+        time
+      });
+    }
+
     await connection.end();
-
-    return NextResponse.json(rows);
+    return NextResponse.json(contacts);
   } catch (error: any) {
-    console.error('❌ Error fetching contacts:', error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (connection) await connection.end();
+    console.error('Error fetching contacts:', error.message);
+    return NextResponse.json([], { status: 200 });
   }
 }

@@ -4,21 +4,8 @@ export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Plus, 
-  Search, 
-  Filter, 
-  MoreVertical, 
-  MessageCircle, 
-  Phone, 
-  Calendar,
-  LayoutGrid,
-  List as ListIcon,
-  User,
-  Trash2,
-  Edit2,
-  ExternalLink,
-  Loader2,
-  ChevronRight
+  Plus, Search, Filter, MoreVertical, MessageCircle, Phone,
+  LayoutGrid, List as ListIcon, Trash2, Edit2, Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
