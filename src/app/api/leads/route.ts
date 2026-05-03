@@ -1,34 +1,58 @@
 import { NextResponse } from 'next/server';
-import { queryTenantData } from '@/lib/db';
-import { v4 as uuidv4 } from 'uuid';
+import mysql from 'mysql2/promise';
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const tenantId = searchParams.get('tenant_id') || 'default-tenant'; // Mock tenant for now
+const dbConfig = {
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT || '3306'),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE || 'default'
+};
 
+// GET: Obtener todos los leads
+export async function GET() {
   try {
-    const leads = await queryTenantData(tenantId, 'SELECT * FROM leads WHERE 1=1', []);
-    return NextResponse.json(leads);
-  } catch (error) {
-    console.error('Database Error:', error);
-    // Fallback mock data for demonstration
-    return NextResponse.json([
-      { id: '1', name: 'Sarah Miller', status: 'new', budget: 450000, source: 'WhatsApp' },
-      { id: '2', name: 'David Chen', status: 'qualified', budget: 1200000, source: 'Facebook' },
-    ]);
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute('SELECT * FROM leads ORDER BY created_at DESC');
+    await connection.end();
+    return NextResponse.json(rows);
+  } catch (error: any) {
+    console.error('Error fetching leads:', error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
-export async function POST(request: Request) {
-  const body = await request.json();
-  const { tenant_id, name, phone, email, budget, notes } = body;
-  const id = uuidv4();
-
+// POST: Guardar un nuevo lead
+export async function POST(req: Request) {
   try {
-    // This would typically use a library like 'mysql2' to insert
-    // For now, we return the mock success
-    return NextResponse.json({ success: true, id, message: 'Lead created successfully' }, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    const body = await req.json();
+    const { 
+      name, phone, email, status, source, 
+      project_interest, assigned_agent, budget, currency, details 
+    } = body;
+
+    const connection = await mysql.createConnection(dbConfig);
+    
+    const [result]: any = await connection.execute(
+      `INSERT INTO leads 
+      (name, phone, email, status, source, project_interest, assigned_agent, budget, currency, details) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        name, phone, email || null, status || 'new', source || 'WhatsApp', 
+        project_interest || null, assigned_agent || null, budget || '0', currency || 'USD', details || null
+      ]
+    );
+
+    await connection.end();
+
+    return NextResponse.json({ 
+      success: true, 
+      id: result.insertId,
+      message: 'Lead guardado correctamente en MariaDB' 
+    });
+
+  } catch (error: any) {
+    console.error('Error saving lead:', error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

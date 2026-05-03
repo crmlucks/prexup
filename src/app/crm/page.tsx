@@ -5,17 +5,16 @@ import {
   Plus, 
   Search, 
   Filter, 
-  MoreVertical, 
   DollarSign,
-  MessageCircle,
   Clock,
   LayoutGrid,
   List as ListIcon,
   ChevronRight,
   User,
-  GripHorizontal
+  GripHorizontal,
+  Loader2
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   DragDropContext, 
   Droppable, 
@@ -24,6 +23,7 @@ import {
 } from '@hello-pangea/dnd';
 import { LeadModal } from '@/components/crm/LeadModal';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/components/ui/Toast';
 
 const columns = [
   { id: 'new', title: 'Nuevos Leads', color: 'border-blue-500/30', dot: 'bg-blue-500', divider: 'divider-new' },
@@ -34,40 +34,44 @@ const columns = [
 ];
 
 export default function CRMPage() {
+  const { showToast } = useToast();
   const [view, setView] = useState<'kanban' | 'list'>('kanban');
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    fetch('/api/leads')
-      .then(res => res.json())
-      .then(data => {
+  const fetchLeads = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/leads');
+      const data = await res.json();
+      if (Array.isArray(data)) {
         setLeads(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setLeads([
-          { id: '1', name: 'Sarah Miller', phone: '+1 234 567', status: 'new', budget: '450,000', property: 'Villa Beachfront', agent: 'Alex Morgan', source: 'WhatsApp', time: 'Ahora' },
-          { id: '2', name: 'David Chen', phone: '+1 987 654', status: 'new', budget: '1,200,000', property: 'Penthouse', agent: 'Sarah Connor', source: 'Facebook', time: '5m' },
-          { id: '3', name: 'Juan Perez', phone: '+57 300...', status: 'qualified', budget: '50,000', property: 'Penthouse Downtown', agent: 'Sarah Connor', source: 'Facebook', time: '1h' },
-        ]);
-        setLoading(false);
-      });
+      }
+    } catch (error) {
+      showToast('Error al cargar leads', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeads();
   }, []);
 
-  const onDragEnd = (result: DropResult) => {
+  const onDragEnd = async (result: DropResult) => {
     const { destination, source, draggableId } = result;
     if (!destination) return;
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
-    setLeads(prev => prev.map(l => 
-      l.id === draggableId ? { ...l, status: destination.droppableId } : l
-    ));
-  };
+    // Actualización local para velocidad
+    const updatedLeads = leads.map(l => 
+      String(l.id) === draggableId ? { ...l, status: destination.droppableId } : l
+    );
+    setLeads(updatedLeads);
 
-  const handleAddLead = (newLead: any) => {
-    setLeads(prev => [newLead, ...prev]);
+    // TODO: Enviar actualización a la DB (api/leads/update)
+    console.log('Cambiando estado de', draggableId, 'a', destination.droppableId);
   };
 
   return (
@@ -75,13 +79,13 @@ export default function CRMPage() {
       <LeadModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        onSave={handleAddLead} 
+        onSave={fetchLeads} 
       />
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold font-outfit tracking-tight">Embudo de Ventas</h1>
-          <p className="text-muted text-[11px] mt-0.5">Gestión visual de prospectos.</p>
+          <p className="text-muted text-[11px] mt-0.5">Gestión visual de prospectos en tiempo real.</p>
         </div>
         
         <div className="flex items-center gap-2">
@@ -94,14 +98,19 @@ export default function CRMPage() {
             </button>
           </div>
 
-          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-brand text-white text-[11px] font-bold shadow-lg shadow-brand-purple/20 transition-all uppercase tracking-widest">
+          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-brand text-white text-[11px] font-black shadow-lg shadow-brand-purple/20 transition-all uppercase tracking-widest">
             <Plus size={14} />
             Nuevo Lead
           </button>
         </div>
       </div>
 
-      {view === 'kanban' ? (
+      {loading && leads.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 opacity-40">
+          <Loader2 size={40} className="animate-spin text-brand-purple mb-4" />
+          <p className="text-sm font-bold uppercase tracking-widest">Sincronizando con MariaDB...</p>
+        </div>
+      ) : view === 'kanban' ? (
         <DragDropContext onDragEnd={onDragEnd}>
           <div className="flex gap-4 overflow-x-auto pb-4 min-h-[calc(100vh-200px)] items-start">
             {columns.map((col) => (
@@ -119,15 +128,15 @@ export default function CRMPage() {
                 <Droppable droppableId={col.id}>
                   {(provided, snapshot) => (
                     <div
-                      {...provided.droppableId}
+                      {...provided.droppableProps}
                       ref={provided.innerRef}
                       className={cn(
-                        "flex-1 space-y-3 p-2 bg-foreground/[0.005] rounded-xl border-deep transition-all min-h-[200px]",
+                        "flex-1 space-y-3 p-2 bg-foreground/[0.005] rounded-xl border-deep transition-all min-h-[300px]",
                         snapshot.isDraggingOver && "bg-foreground/[0.02] border-brand-purple/20"
                       )}
                     >
                       {leads.filter(l => l.status === col.id).map((lead, index) => (
-                        <Draggable key={lead.id} draggableId={lead.id} index={index}>
+                        <Draggable key={String(lead.id)} draggableId={String(lead.id)} index={index}>
                           {(provided, snapshot) => (
                             <div
                               ref={provided.innerRef}
@@ -148,21 +157,20 @@ export default function CRMPage() {
                               
                               <h4 className="font-bold text-[12px] mb-0.5 tracking-tight">{lead.name}</h4>
                               <p className="text-[10px] text-muted leading-tight truncate">
-                                {lead.property} <br />
-                                <span className="text-[9px] opacity-60 italic">{lead.agent}</span>
+                                {lead.project_interest || lead.property || 'Sin proyecto'} <br />
+                                <span className="text-[9px] opacity-60 italic">{lead.assigned_agent || lead.agent}</span>
                               </p>
                               
-                              {/* Línea Divisora con Color de Etapa */}
                               <div className={cn("w-full h-[0.5px] mt-3 mb-2", col.divider)} />
                               
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center text-[11px] font-black text-emerald-500">
                                   <DollarSign size={10} className="mr-0.5" />
-                                  {lead.budget}
+                                  {lead.budget} {lead.currency}
                                 </div>
                                 <div className="flex items-center text-[9px] text-muted font-bold">
                                   <Clock size={10} className="mr-0.5" />
-                                  {lead.time}
+                                  {lead.created_at ? new Date(lead.created_at).toLocaleDateString() : 'Hoy'}
                                 </div>
                               </div>
                             </div>
@@ -173,7 +181,7 @@ export default function CRMPage() {
                       
                       <button 
                         onClick={() => setIsModalOpen(true)}
-                        className="w-full py-2 border border-dashed border-white/[0.05] rounded-lg text-[9px] text-muted hover:text-foreground hover:border-brand-purple/20 transition-all uppercase tracking-widest font-black"
+                        className="w-full py-3 border border-dashed border-white/[0.05] rounded-lg text-[9px] text-muted hover:text-foreground hover:border-brand-purple/20 transition-all uppercase tracking-widest font-black"
                       >
                         + Añadir Lead
                       </button>
@@ -218,8 +226,8 @@ export default function CRMPage() {
                       {columns.find(c => c.id === lead.status)?.title}
                     </span>
                   </td>
-                  <td className="px-4 py-2.5 font-bold text-emerald-500">{lead.budget}</td>
-                  <td className="px-4 py-2.5 text-muted">{lead.agent}</td>
+                  <td className="px-4 py-2.5 font-bold text-emerald-500">{lead.budget} {lead.currency}</td>
+                  <td className="px-4 py-2.5 text-muted">{lead.assigned_agent}</td>
                   <td className="px-4 py-2.5 text-right">
                     <button className="p-1.5 hover:bg-brand-purple/10 rounded-md transition-all text-muted hover:text-brand-purple">
                       <ChevronRight size={14} />
