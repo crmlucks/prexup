@@ -26,11 +26,19 @@ export async function GET(req: Request) {
       'SELECT * FROM chat_messages WHERE sender_id = ? ORDER BY timestamp ASC',
       [phone]
     );
+
+    // Mark inbound messages as read
+    try {
+      await connection.execute(
+        'UPDATE chat_messages SET is_read = 1 WHERE sender_id = ? AND is_from_me = 0 AND is_read = 0',
+        [phone]
+      );
+    } catch (_) {}
+
     await connection.end();
     return NextResponse.json(rows);
   } catch (error: any) {
     if (connection) await connection.end();
-    // Si la tabla no existe, retornamos array vacío
     return NextResponse.json([], { status: 200 });
   }
 }

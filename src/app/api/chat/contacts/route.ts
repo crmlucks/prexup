@@ -16,38 +16,59 @@ export async function GET() {
   try {
     connection = await mysql.createConnection(dbConfig);
 
-    // Simplificado: Traemos TODOS los leads directamente
+    // Traemos leads con toda la info necesaria para el chat
     const [leads]: any = await connection.execute(
-      'SELECT id, name, phone, status, source, created_at FROM leads ORDER BY created_at DESC'
+      'SELECT id, name, phone, email, status, source, budget, currency, project_interest, assigned_agent, details, created_at FROM leads ORDER BY created_at DESC'
     );
 
-    // Construimos la lista de contactos desde los leads
     const contacts = [];
     for (const lead of leads) {
       let lastMsg = 'Sin mensajes aún';
       let time = lead.created_at;
+      let unread = 0;
+      let lastMsgType = 'text';
 
-      // Intentamos buscar el último mensaje (si la tabla existe)
       try {
         const [msgs]: any = await connection.execute(
-          'SELECT message_text, timestamp FROM chat_messages WHERE sender_id = ? ORDER BY timestamp DESC LIMIT 1',
+          'SELECT message_text, message_type, timestamp, is_from_me FROM chat_messages WHERE sender_id = ? ORDER BY timestamp DESC LIMIT 1',
           [lead.phone]
         );
         if (msgs.length > 0) {
-          lastMsg = msgs[0].message_text || 'Multimedia';
+          lastMsgType = msgs[0].message_type || 'text';
+          if (lastMsgType === 'image') lastMsg = '📷 Imagen';
+          else if (lastMsgType === 'video') lastMsg = '🎬 Video';
+          else if (lastMsgType === 'audio') lastMsg = '🎤 Audio';
+          else if (lastMsgType === 'document') lastMsg = '📄 Documento';
+          else lastMsg = msgs[0].message_text || 'Multimedia';
           time = msgs[0].timestamp;
         }
-      } catch (_) {
-        // Si chat_messages no existe, no pasa nada
-      }
+      } catch (_) {}
+
+      // Count unread messages (inbound messages not from me)
+      try {
+        const [unreadRows]: any = await connection.execute(
+          'SELECT COUNT(*) as cnt FROM chat_messages WHERE sender_id = ? AND is_from_me = 0 AND is_read = 0',
+          [lead.phone]
+        );
+        unread = unreadRows[0]?.cnt || 0;
+      } catch (_) {}
 
       contacts.push({
+        lead_id: lead.id,
         phone: lead.phone,
         name: lead.name,
+        email: lead.email,
         status: lead.status,
         source: lead.source,
+        budget: lead.budget,
+        currency: lead.currency,
+        project_interest: lead.project_interest,
+        assigned_agent: lead.assigned_agent,
+        details: lead.details,
         lastMsg,
-        time
+        lastMsgType,
+        time,
+        unread
       });
     }
 
