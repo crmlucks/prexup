@@ -65,12 +65,16 @@ export async function POST(req: Request) {
       );
 
       // --- n8n Webhook Forwarding ---
-      if (!isFromMe && messageType === 'text' && messageText.trim().length > 0) {
+      if (!isFromMe && (messageType === 'text' || messageType === 'audio')) {
         try {
           const [settingsRows]: any = await connection.query('SELECT webhook_url, prompt, is_active, evolution_instance FROM chatbot_settings ORDER BY id DESC LIMIT 1');
           if (settingsRows && settingsRows.length > 0) {
             const settings = settingsRows[0];
             if (settings.is_active === 1 && settings.webhook_url) {
+              
+              // Extraemos el messageId original si es necesario para Evolution
+              const messageId = message.key.id;
+
               // Enviar en background
               fetch(settings.webhook_url, {
                 method: 'POST',
@@ -78,9 +82,13 @@ export async function POST(req: Request) {
                 body: JSON.stringify({
                   phone: phone,
                   message: messageText,
+                  messageType: messageType,
+                  mediaUrl: mediaUrl,
+                  messageId: messageId,
                   prompt: settings.prompt || '',
                   instance: settings.evolution_instance || body.instance || 'chatprex',
-                  timestamp: new Date().toISOString()
+                  timestamp: new Date().toISOString(),
+                  rawMessage: message // Objeto completo necesario para obtener media
                 })
               }).catch(err => console.error("Error al reenviar a n8n:", err));
             }
