@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Plus, Search, Filter, MoreVertical, MessageCircle, Phone,
+  Plus, Search, Filter, MessageCircle, Phone,
   LayoutGrid, List as ListIcon, Trash2, Edit2, Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -126,29 +126,27 @@ export default function CRMPage() {
                   {/* Indicador de arrastre */}
                   <div className="absolute top-0 left-0 w-1 h-full bg-brand-purple/30 group-hover:bg-brand-purple transition-all" />
                   
-                  <div className="flex justify-between items-start mb-3">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-brand-purple bg-brand-purple/10 px-2 py-0.5 rounded-md">{lead.source || 'WHATSAPP'}</span>
-                    <button className="text-muted hover:text-foreground"><MoreVertical size={14} /></button>
-                  </div>
-                  
-                  <h4 className="font-bold text-[14px] mb-1 text-white/90 leading-tight">{lead.name}</h4>
-                  <p className="text-[11px] text-muted mb-1 font-medium">{lead.project_interest}</p>
-                  
-                  <div className="flex items-center gap-2 text-brand-purple font-bold mb-4">
-                    <Phone size={12} />
-                    <span className="text-[12px]">{lead.phone}</span>
+                  {/* NOMBRE + TELÉFONO ARRIBA */}
+                  <h4 className="font-bold text-[13px] text-white/90 leading-tight mb-0.5 pl-2">{lead.name}</h4>
+                  <div className="flex items-center gap-1.5 text-brand-purple pl-2 mb-3">
+                    <Phone size={10} />
+                    <span className="text-[11px] font-medium">{lead.phone}</span>
                   </div>
 
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/5">
-                    <div className="flex items-center gap-3">
-                       <span className="text-[13px] font-black text-emerald-500">${lead.budget || '0'} <span className="text-[9px] opacity-60">{lead.currency}</span></span>
-                    </div>
-                    
-                    <div className="flex items-center gap-1.5">
-                      <button onClick={() => handleEdit(lead)} className="p-2 rounded-xl bg-foreground/5 hover:bg-brand-purple/10 text-muted hover:text-brand-purple transition-all"><Edit2 size={14} /></button>
-                      <Link href="/chat" className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 hover:scale-110 transition-all"><MessageCircle size={14} /></Link>
-                      <button onClick={() => handleDelete(lead.id)} className="p-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all"><Trash2 size={14} /></button>
-                    </div>
+                  {/* DETALLES */}
+                  <div className="flex items-center justify-between mb-3 pl-2">
+                    <span className="text-[8px] font-black uppercase tracking-widest text-brand-purple/70 bg-brand-purple/10 px-1.5 py-0.5 rounded">{lead.source || 'WHATSAPP'}</span>
+                    <span className="text-[11px] font-bold text-emerald-500">${lead.budget || '0'} <span className="text-[8px] opacity-50">{lead.currency}</span></span>
+                  </div>
+                  {lead.project_interest && (
+                    <p className="text-[10px] text-muted/60 pl-2 mb-2 truncate">{lead.project_interest}</p>
+                  )}
+
+                  {/* ACCIONES — iconos reducidos */}
+                  <div className="flex items-center justify-end gap-1 pt-2 border-t border-white/5">
+                    <button onClick={() => handleEdit(lead)} title="Editar" className="p-1.5 rounded-lg bg-white/5 hover:bg-brand-purple/10 text-muted hover:text-brand-purple transition-all"><Edit2 size={12} /></button>
+                    <Link href="/chat" title="Chat" className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 hover:scale-110 transition-all"><MessageCircle size={12} /></Link>
+                    <button onClick={() => handleDelete(lead.id)} title="Eliminar" className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all"><Trash2 size={12} /></button>
                   </div>
                 </motion.div>
               ))}
