@@ -15,7 +15,11 @@ export async function POST(req: Request) {
     
     // Verificamos si es un evento de mensaje
     if (body.event === 'messages.upsert') {
-      const message = body.data;
+      let message = Array.isArray(body.data) ? body.data[0] : body.data;
+      if (!message || !message.key || !message.key.remoteJid) {
+         return NextResponse.json({ success: true });
+      }
+
       const phone = message.key.remoteJid.split('@')[0];
       const isFromMe = message.key.fromMe ? 1 : 0;
       
@@ -23,24 +27,35 @@ export async function POST(req: Request) {
       let messageType = 'text';
       let mediaUrl = null;
 
+      // Extract the actual message object (sometimes wrapped in ephemeralMessage or viewOnceMessage)
+      const msgData = message.message?.ephemeralMessage?.message || message.message?.viewOnceMessage?.message || message.message;
+
       // Detectar tipo de mensaje y contenido
-      if (message.message?.conversation) {
-        messageText = message.message.conversation;
-      } else if (message.message?.extendedTextMessage?.text) {
-        messageText = message.message.extendedTextMessage.text;
-      } else if (message.message?.imageMessage) {
+      if (msgData?.conversation) {
+        messageText = msgData.conversation;
+      } else if (msgData?.extendedTextMessage?.text) {
+        messageText = msgData.extendedTextMessage.text;
+      } else if (msgData?.imageMessage) {
         messageType = 'image';
-        messageText = message.message.imageMessage.caption || 'Imagen';
-        // Aquí Evolution API suele enviar el buffer o URL si está configurado
-        mediaUrl = message.message.imageMessage.url || null; 
-      } else if (message.message?.videoMessage) {
+        messageText = msgData.imageMessage.caption || 'Imagen';
+        mediaUrl = msgData.imageMessage.url || null; 
+      } else if (msgData?.videoMessage) {
         messageType = 'video';
-        messageText = message.message.videoMessage.caption || 'Video';
-        mediaUrl = message.message.videoMessage.url || null;
-      } else if (message.message?.documentMessage) {
+        messageText = msgData.videoMessage.caption || 'Video';
+        mediaUrl = msgData.videoMessage.url || null;
+      } else if (msgData?.audioMessage) {
+        messageType = 'audio';
+        messageText = 'Audio';
+        mediaUrl = msgData.audioMessage.url || null;
+      } else if (msgData?.documentMessage) {
         messageType = 'document';
-        messageText = message.message.documentMessage.title || 'Documento';
-        mediaUrl = message.message.documentMessage.url || null;
+        messageText = msgData.documentMessage.title || msgData.documentMessage.fileName || 'Documento';
+        mediaUrl = msgData.documentMessage.url || null;
+      } else if (msgData?.stickerMessage) {
+        messageType = 'image';
+        messageText = 'Sticker';
+      } else {
+        messageText = 'Mensaje multimedia o sistema';
       }
 
       const connection = await mysql.createConnection(dbConfig);

@@ -39,14 +39,14 @@ export async function GET() {
 export async function POST(req: Request) {
   let connection;
   try {
-    const { label, text, category } = await req.json();
-    if (!label || !text) {
-      return NextResponse.json({ error: 'Falta label o texto' }, { status: 400 });
+    const { label, text, category, media_url } = await req.json();
+    if (!label || (!text && !media_url)) {
+      return NextResponse.json({ error: 'Falta label, texto o media_url' }, { status: 400 });
     }
     connection = await mysql.createConnection(dbConfig);
     const [result]: any = await connection.execute(
-      'INSERT INTO quick_responses (label, text, category) VALUES (?, ?, ?)',
-      [label, text, category || 'general']
+      'INSERT INTO quick_responses (label, text, category, media_url) VALUES (?, ?, ?, ?)',
+      [label, text || '', category || 'general', media_url || null]
     );
     await connection.end();
     return NextResponse.json({ success: true, id: result.insertId });
@@ -60,12 +60,12 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   let connection;
   try {
-    const { id, label, text, category } = await req.json();
+    const { id, label, text, category, media_url } = await req.json();
     if (!id) return NextResponse.json({ error: 'Falta ID' }, { status: 400 });
     connection = await mysql.createConnection(dbConfig);
     await connection.execute(
-      'UPDATE quick_responses SET label = ?, text = ?, category = ? WHERE id = ?',
-      [label, text, category || 'general', id]
+      'UPDATE quick_responses SET label = ?, text = ?, category = ?, media_url = ? WHERE id = ?',
+      [label, text || '', category || 'general', media_url || null, id]
     );
     await connection.end();
     return NextResponse.json({ success: true });

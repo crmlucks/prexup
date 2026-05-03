@@ -3,11 +3,11 @@ import React, { useState } from 'react';
 import { X, Zap, Edit2, Trash2, Plus, Save, Eye, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface QR { id: number; label: string; text: string; category?: string; }
+interface QR { id: number; label: string; text: string; category?: string; media_url?: string; }
 
 interface Props {
   responses: QR[];
-  onSend: (text: string) => void;
+  onSend: (text: string, mediaUrl?: string) => void;
   onSave: (qr: Partial<QR>) => void;
   onDelete: (id: number) => void;
   onClose: () => void;
@@ -66,9 +66,11 @@ export default function QuickResponseManager({ responses, onSend, onSave, onDele
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
               {filtered.map(qr => (
                 <div key={qr.id} className="group relative text-left p-2.5 rounded-xl bg-white/5 hover:bg-brand-purple/10 border border-white/5 hover:border-brand-purple/20 transition-all">
-                  <button onClick={() => onSend(qr.text)} className="w-full text-left">
-                    <span className="text-[8px] font-black text-brand-purple uppercase">{qr.label}</span>
-                    <p className="text-[9px] text-white/50 line-clamp-2 mt-0.5">{qr.text}</p>
+                  <button onClick={() => onSend(qr.text, qr.media_url)} className="w-full text-left">
+                    <span className="text-[8px] font-black text-brand-purple uppercase flex items-center gap-1">
+                      {qr.label} {qr.media_url && <span className="text-[10px]">📎</span>}
+                    </span>
+                    <p className="text-[9px] text-white/50 line-clamp-2 mt-0.5">{qr.text || 'Multimedia'}</p>
                   </button>
                   <div className="absolute top-1 right-1 hidden group-hover:flex gap-0.5">
                     <button onClick={() => { setPreview(qr); setMode('preview'); }} className="p-0.5 rounded bg-white/10 hover:bg-white/20"><Eye size={9} className="text-muted" /></button>
@@ -91,6 +93,8 @@ export default function QuickResponseManager({ responses, onSend, onSave, onDele
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
+            <input value={editing.media_url || ''} onChange={e => setEditing({ ...editing, media_url: e.target.value })}
+              placeholder="URL de imagen, video o documento (Opcional)" className="w-full px-3 py-1.5 rounded-lg text-[11px] bg-white/5 border border-white/10 focus:border-brand-purple/30 outline-none" />
             <textarea value={editing.text || ''} onChange={e => setEditing({ ...editing, text: e.target.value })}
               placeholder="Mensaje de respuesta rápida..." rows={3}
               className="w-full px-3 py-2 rounded-lg text-[11px] bg-white/5 border border-white/10 focus:border-brand-purple/30 outline-none resize-none" />
@@ -109,11 +113,16 @@ export default function QuickResponseManager({ responses, onSend, onSave, onDele
           <motion.div key="preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
             <div className="text-[9px] font-black text-brand-purple uppercase mb-1">Vista Previa</div>
             <div className="bg-brand-purple/90 text-white rounded-2xl rounded-tr-sm px-3 py-2 max-w-[80%] ml-auto shadow">
+              {preview.media_url && (
+                <div className="mb-2 bg-black/20 p-2 rounded text-center text-[10px]">
+                  📎 Adjunto configurado
+                </div>
+              )}
               <p className="text-[11px] leading-relaxed">{preview.text}</p>
             </div>
             <div className="flex justify-end gap-2 pt-1">
               <button onClick={() => setMode('list')} className="px-3 py-1 rounded-lg text-[10px] font-bold text-muted hover:bg-white/5">Volver</button>
-              <button onClick={() => { onSend(preview.text); onClose(); }}
+              <button onClick={() => { onSend(preview.text, preview.media_url); onClose(); }}
                 className="px-3 py-1 rounded-lg text-[10px] font-bold bg-emerald-500 text-white">Enviar</button>
             </div>
           </motion.div>

@@ -53,6 +53,7 @@ export default function ChatPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const imgRef = useRef<HTMLInputElement>(null);
   const vidRef = useRef<HTMLInputElement>(null);
+  const audioRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
@@ -166,8 +167,8 @@ export default function ChatPage() {
     }
   };
 
-  const handleSendText = async (textToSend = input) => {
-    if (!textToSend.trim() || !selected || sending) return;
+  const handleSendText = async (textToSend: string = input, mediaUrl?: string) => {
+    if ((!textToSend.trim() && !mediaUrl) || !selected || sending) return;
     
     const text = textToSend.trim();
     setInput(''); 
@@ -178,20 +179,31 @@ export default function ChatPage() {
     // Optimistic message
     const tempMsg = {
       id: Date.now(),
-      message_text: text,
-      message_type: 'text',
+      message_text: text || 'Multimedia',
+      message_type: mediaUrl ? 'document' : 'text',
+      media_url: mediaUrl,
       is_from_me: 1,
       timestamp: new Date().toISOString()
     };
     setMessages(prev => [...prev, tempMsg]);
 
     try {
-      const r = await fetch('/api/chat/send', {
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: selected.phone, text })
-      });
-      const d = await r.json();
+      let r, d;
+      if (mediaUrl) {
+        const fd = new FormData();
+        fd.append('phone', selected.phone);
+        fd.append('mediaUrl', mediaUrl);
+        fd.append('caption', text);
+        r = await fetch('/api/chat/send-media', { method: 'POST', body: fd });
+      } else {
+        r = await fetch('/api/chat/send', {
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: selected.phone, text })
+        });
+      }
+      
+      d = await r.json();
       if (!d.success) { 
         showToast(d.error || 'Error al enviar', 'error'); 
         setInput(text); // Restore input
@@ -347,6 +359,7 @@ export default function ChatPage() {
       <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip" className="hidden" onChange={handleFileChange} />
       <input ref={imgRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
       <input ref={vidRef} type="file" accept="video/*" className="hidden" onChange={handleFileChange} />
+      <input ref={audioRef} type="file" accept="audio/*" className="hidden" onChange={handleFileChange} />
 
       {/* --- SIDEBAR --- */}
       <div className={cn(
@@ -552,6 +565,10 @@ export default function ChatPage() {
                       <button onClick={() => { vidRef.current?.click(); }} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-brand-purple/20 text-left transition-all group">
                         <div className="p-2 rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20"><Video size={16} className="text-emerald-400" /></div>
                         <span className="text-[12px] font-bold">Video</span>
+                      </button>
+                      <button onClick={() => { audioRef.current?.click(); }} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-brand-purple/20 text-left transition-all group">
+                        <div className="p-2 rounded-lg bg-pink-500/10 group-hover:bg-pink-500/20"><Mic size={16} className="text-pink-400" /></div>
+                        <span className="text-[12px] font-bold">Audio</span>
                       </button>
                       <button onClick={() => { fileRef.current?.click(); }} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-brand-purple/20 text-left transition-all group">
                         <div className="p-2 rounded-lg bg-amber-500/10 group-hover:bg-amber-500/20"><File size={16} className="text-amber-400" /></div>

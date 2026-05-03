@@ -38,9 +38,20 @@ export async function GET() {
         label VARCHAR(100) NOT NULL,
         text TEXT NOT NULL,
         category VARCHAR(50) DEFAULT 'general',
+        media_url TEXT,
         sort_order INT DEFAULT 0
       )`);
       log.push('✔ Tabla "quick_responses" lista');
+      
+      // Intentar agregar media_url por si ya existía sin ella
+      try {
+        await connection.query(`ALTER TABLE quick_responses ADD COLUMN media_url TEXT`);
+        log.push('✔ Columna "media_url" añadida a quick_responses');
+      } catch (e: any) {
+        if (e.code === 'ER_DUP_FIELDNAME') {
+          log.push('ℹ Columna "media_url" ya existe en quick_responses');
+        }
+      }
     } catch (e: any) {
       log.push(`⚠ Error en quick_responses: ${e.message}`);
     }
