@@ -9,7 +9,48 @@ const dbConfig = {
   database: process.env.DB_DATABASE || 'default'
 };
 
-// GET: Obtener todos los leads
+export async function POST(req: Request) {
+  let connection;
+  try {
+    const body = await req.json();
+    console.log('📥 Recibiendo lead:', body);
+
+    connection = await mysql.createConnection(dbConfig);
+    
+    // Usamos nombres de columnas exactos y limpiamos valores
+    const [result]: any = await connection.execute(
+      `INSERT INTO leads 
+      (name, phone, email, status, source, project_interest, assigned_agent, budget, currency, details) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        body.name || 'Sin nombre',
+        body.phone || '000000000',
+        body.email || null,
+        body.status || 'new',
+        body.source || 'WhatsApp',
+        body.project_interest || null,
+        body.assigned_agent || null,
+        body.budget || '0',
+        body.currency || 'USD',
+        body.details || null
+      ]
+    );
+
+    await connection.end();
+    return NextResponse.json({ success: true, id: result.insertId });
+
+  } catch (error: any) {
+    console.error('❌ Error fatal en MariaDB:', error.message);
+    if (connection) await connection.end();
+    
+    // Enviamos el mensaje de error real al frontend para verlo en el Toast
+    return NextResponse.json({ 
+      success: false, 
+      error: `Error de Base de Datos: ${error.message}` 
+    }, { status: 500 });
+  }
+}
+
 export async function GET() {
   try {
     const connection = await mysql.createConnection(dbConfig);
@@ -17,42 +58,6 @@ export async function GET() {
     await connection.end();
     return NextResponse.json(rows);
   } catch (error: any) {
-    console.error('Error fetching leads:', error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
-
-// POST: Guardar un nuevo lead
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
-    const { 
-      name, phone, email, status, source, 
-      project_interest, assigned_agent, budget, currency, details 
-    } = body;
-
-    const connection = await mysql.createConnection(dbConfig);
-    
-    const [result]: any = await connection.execute(
-      `INSERT INTO leads 
-      (name, phone, email, status, source, project_interest, assigned_agent, budget, currency, details) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        name, phone, email || null, status || 'new', source || 'WhatsApp', 
-        project_interest || null, assigned_agent || null, budget || '0', currency || 'USD', details || null
-      ]
-    );
-
-    await connection.end();
-
-    return NextResponse.json({ 
-      success: true, 
-      id: result.insertId,
-      message: 'Lead guardado correctamente en MariaDB' 
-    });
-
-  } catch (error: any) {
-    console.error('Error saving lead:', error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
