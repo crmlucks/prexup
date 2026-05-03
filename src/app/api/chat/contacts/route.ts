@@ -8,7 +8,7 @@ const dbConfig = {
   port: parseInt(process.env.DB_PORT || '3306'),
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE || 'default'
+  database: process.env.DB_DATABASE || 'prexup_crm'
 };
 
 export async function GET() {
@@ -16,7 +16,6 @@ export async function GET() {
   try {
     connection = await mysql.createConnection(dbConfig);
 
-    // Traemos leads con toda la info necesaria para el chat
     const [leads]: any = await connection.execute(
       'SELECT id, name, phone, email, status, source, budget, currency, project_interest, assigned_agent, details, created_at FROM leads ORDER BY created_at DESC'
     );
@@ -28,10 +27,13 @@ export async function GET() {
       let unread = 0;
       let lastMsgType = 'text';
 
+      // Normalizar teléfono para buscar en ambos formatos
+      const cleanPhone = (lead.phone || '').replace(/\D/g, '');
+
       try {
         const [msgs]: any = await connection.execute(
-          'SELECT message_text, message_type, timestamp, is_from_me FROM chat_messages WHERE sender_id = ? ORDER BY timestamp DESC LIMIT 1',
-          [lead.phone]
+          'SELECT message_text, message_type, timestamp, is_from_me FROM chat_messages WHERE sender_id = ? OR sender_id = ? ORDER BY timestamp DESC LIMIT 1',
+          [lead.phone, cleanPhone]
         );
         if (msgs.length > 0) {
           lastMsgType = msgs[0].message_type || 'text';
@@ -44,11 +46,11 @@ export async function GET() {
         }
       } catch (_) {}
 
-      // Count unread messages (inbound messages not from me)
+      // Count unread
       try {
         const [unreadRows]: any = await connection.execute(
-          'SELECT COUNT(*) as cnt FROM chat_messages WHERE sender_id = ? AND is_from_me = 0 AND is_read = 0',
-          [lead.phone]
+          'SELECT COUNT(*) as cnt FROM chat_messages WHERE (sender_id = ? OR sender_id = ?) AND is_from_me = 0 AND is_read = 0',
+          [lead.phone, cleanPhone]
         );
         unread = unreadRows[0]?.cnt || 0;
       } catch (_) {}
