@@ -106,17 +106,17 @@ export default function LeadModal({ isOpen, onClose, onSuccess, editLead }: Lead
         className="w-full max-w-2xl glass rounded-2xl overflow-hidden border-deep shadow-2xl"
       >
         {/* Header */}
-        <div className="p-6 border-b border-deep flex items-center justify-between bg-gradient-brand">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-white/20 text-white">
-              <UserPlus size={20} />
+        <div className="p-4 border-b border-deep flex items-center justify-between bg-gradient-brand">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-white/20 text-white">
+              <UserPlus size={16} />
             </div>
-            <h2 className="text-xl font-bold font-outfit text-white">
-              {editLead ? 'Editar Lead' : 'Registrar Nuevo Lead'}
+            <h2 className="text-lg font-bold font-outfit text-white">
+              {editLead ? 'Editar Lead' : 'Nuevo Lead'}
             </h2>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/10 text-white transition-all">
-            <X size={20} />
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 text-white transition-all">
+            <X size={18} />
           </button>
         </div>
 

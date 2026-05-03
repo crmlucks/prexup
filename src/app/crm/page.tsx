@@ -261,34 +261,34 @@ export default function CRMPage() {
   return (
     <div className="space-y-6 animate-fade-in pb-20">
       {/* Header CRM */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-             <h1 className="text-2xl font-black font-outfit tracking-tight">CRM PrexUp</h1>
-              <span className="bg-brand-purple/20 text-brand-purple text-[9px] font-black px-2 py-0.5 rounded-md border border-brand-purple/30 uppercase tracking-widest">v1.7 DRAG & DROP</span>
+          <div className="flex items-center gap-2 mb-0.5">
+             <h1 className="text-xl font-black font-outfit tracking-tight">CRM PrexUp</h1>
+             <span className="bg-brand-purple/20 text-brand-purple text-[8px] font-black px-1.5 py-0.5 rounded border border-brand-purple/30 uppercase tracking-widest">v1.8 COMPACT</span>
           </div>
-          <p className="text-muted text-[11px] font-medium uppercase tracking-wider">Gestión de Pipeline en tiempo real</p>
+          <p className="text-muted text-[10px] font-medium uppercase tracking-wider">Gestión de Pipeline</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex bg-foreground/5 p-1 rounded-2xl border-thin">
+        <div className="flex items-center gap-2">
+          <div className="flex bg-foreground/5 p-1 rounded-xl border-thin">
             <button 
               onClick={() => setView('kanban')}
-              className={cn("p-2.5 rounded-xl transition-all", view === 'kanban' ? "bg-white shadow-md text-brand-purple" : "text-muted hover:text-foreground")}
+              className={cn("p-1.5 rounded-lg transition-all", view === 'kanban' ? "bg-white shadow-md text-brand-purple" : "text-muted hover:text-foreground")}
             >
-              <LayoutGrid size={18} />
+              <LayoutGrid size={16} />
             </button>
             <button 
               onClick={() => setView('list')}
-              className={cn("p-2.5 rounded-xl transition-all", view === 'list' ? "bg-white shadow-md text-brand-purple" : "text-muted hover:text-foreground")}
+              className={cn("p-1.5 rounded-lg transition-all", view === 'list' ? "bg-white shadow-md text-brand-purple" : "text-muted hover:text-foreground")}
             >
-              <ListIcon size={18} />
+              <ListIcon size={16} />
             </button>
           </div>
           <button 
             onClick={() => { setEditingLead(null); setIsModalOpen(true); }}
-            className="flex items-center gap-3 bg-gradient-brand text-white px-6 py-3 rounded-2xl font-black text-[12px] uppercase tracking-widest shadow-xl shadow-brand-purple/30 hover:scale-[1.03] active:scale-95 transition-all"
+            className="flex items-center gap-2 bg-gradient-brand text-white px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-brand-purple/30 hover:scale-[1.03] active:scale-95 transition-all"
           >
-            <Plus size={18} />
+            <Plus size={14} />
             Nuevo Lead
           </button>
         </div>

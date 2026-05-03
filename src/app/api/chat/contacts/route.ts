@@ -13,15 +13,14 @@ export async function GET() {
   try {
     const connection = await mysql.createConnection(dbConfig);
 
-    // Consulta Universal:
-    // Traemos todos los números que tienen mensajes Y los unimos con la tabla de leads para sacar sus nombres
+    // Consulta Mejorada: Trae leads y gente que escribió, manejando casos sin mensajes
     const query = `
       SELECT 
         combined.phone,
         COALESCE(l.name, combined.phone) as name,
-        m.message_text as lastMsg,
-        m.timestamp as time,
-        (SELECT COUNT(*) FROM chat_messages WHERE sender_id = combined.phone AND is_from_me = 0 AND timestamp > m.timestamp) as unread
+        COALESCE(m.message_text, 'Nuevo Lead (Sin mensajes)') as lastMsg,
+        COALESCE(m.timestamp, l.created_at) as time,
+        (SELECT COUNT(*) FROM chat_messages WHERE sender_id = combined.phone AND is_from_me = 0 AND timestamp > COALESCE(m.timestamp, '1970-01-01')) as unread
       FROM (
         SELECT DISTINCT sender_id as phone FROM chat_messages
         UNION
@@ -41,7 +40,7 @@ export async function GET() {
 
     return NextResponse.json(rows);
   } catch (error: any) {
-    console.error('❌ Error fetching universal contacts:', error.message);
+    console.error('❌ Error fetching contacts:', error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
