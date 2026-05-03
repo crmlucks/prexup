@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import mysql from 'mysql2/promise';
 
 export async function GET() {
-  console.log('🔧 Reparando esquema de base de datos...');
+  console.log('🔧 Reparando auto-incremento de ID...');
 
   try {
     const connection = await mysql.createConnection({
@@ -13,15 +13,21 @@ export async function GET() {
       database: process.env.DB_DATABASE || 'default'
     });
 
-    // 1. Asegurar que las columnas existan (usando ALTER TABLE con IF NOT EXISTS para MariaDB 10.5+)
+    // 1. Forzar que el ID sea auto-incremental
+    // Nota: Esto también asegura que sea PRIMARY KEY si no lo era.
+    await connection.query("ALTER TABLE leads MODIFY COLUMN id INT AUTO_INCREMENT PRIMARY KEY");
+
+    // 2. Asegurar que las otras columnas existan (por si acaso)
     const migrations = [
       "ALTER TABLE leads ADD COLUMN IF NOT EXISTS email VARCHAR(255) AFTER phone",
+      "ALTER TABLE leads ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'new' AFTER email",
       "ALTER TABLE leads ADD COLUMN IF NOT EXISTS source VARCHAR(50) AFTER status",
       "ALTER TABLE leads ADD COLUMN IF NOT EXISTS project_interest VARCHAR(255) AFTER source",
       "ALTER TABLE leads ADD COLUMN IF NOT EXISTS assigned_agent VARCHAR(255) AFTER project_interest",
       "ALTER TABLE leads ADD COLUMN IF NOT EXISTS budget VARCHAR(50) AFTER assigned_agent",
       "ALTER TABLE leads ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'USD' AFTER budget",
       "ALTER TABLE leads ADD COLUMN IF NOT EXISTS details TEXT AFTER currency",
+      "ALTER TABLE leads ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
       "ALTER TABLE leads ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
     ];
 
@@ -29,14 +35,14 @@ export async function GET() {
       try {
         await connection.query(query);
       } catch (err) {
-        console.warn('Nota de migración:', err);
+        console.warn('Migración saltada o ya aplicada:', err);
       }
     }
 
     await connection.end();
     return NextResponse.json({ 
       success: true, 
-      message: '✨ Base de datos reparada y actualizada correctamente.' 
+      message: '🚀 ¡ID arreglado y esquema actualizado! Ya puedes guardar leads.' 
     });
 
   } catch (error: any) {
