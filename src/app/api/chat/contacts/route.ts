@@ -13,33 +13,35 @@ export async function GET() {
   try {
     const connection = await mysql.createConnection(dbConfig);
 
-    // Buscamos todos los leads y el último mensaje de cada uno si existe
-    // Hacemos un LEFT JOIN con chat_messages para ver quién nos escribió último
-    const [rows]: any = await connection.execute(`
+    // Consulta Universal:
+    // Traemos todos los números que tienen mensajes Y los unimos con la tabla de leads para sacar sus nombres
+    const query = `
       SELECT 
-        l.phone, 
-        l.name, 
-        (SELECT message_text FROM chat_messages WHERE sender_id = l.phone OR (is_from_me = 1 AND sender_id = l.phone) ORDER BY timestamp DESC LIMIT 1) as lastMsg,
-        (SELECT timestamp FROM chat_messages WHERE sender_id = l.phone OR (is_from_me = 1 AND sender_id = l.phone) ORDER BY timestamp DESC LIMIT 1) as time,
-        0 as unread
-      FROM leads l
-      ORDER BY time DESC, l.created_at DESC
-    `);
+        combined.phone,
+        COALESCE(l.name, combined.phone) as name,
+        m.message_text as lastMsg,
+        m.timestamp as time,
+        (SELECT COUNT(*) FROM chat_messages WHERE sender_id = combined.phone AND is_from_me = 0 AND timestamp > m.timestamp) as unread
+      FROM (
+        SELECT DISTINCT sender_id as phone FROM chat_messages
+        UNION
+        SELECT phone FROM leads
+      ) combined
+      LEFT JOIN leads l ON l.phone = combined.phone
+      LEFT JOIN chat_messages m ON m.id = (
+        SELECT id FROM chat_messages 
+        WHERE sender_id = combined.phone 
+        ORDER BY timestamp DESC LIMIT 1
+      )
+      ORDER BY time DESC, combined.phone ASC
+    `;
 
+    const [rows]: any = await connection.execute(query);
     await connection.end();
 
-    // Formateamos para el frontend
-    const contacts = rows.map((row: any) => ({
-      phone: row.phone,
-      name: row.name,
-      lastMsg: row.lastMsg || 'Sin mensajes aún',
-      time: row.time || null,
-      unread: row.unread || 0
-    }));
-
-    return NextResponse.json(contacts);
+    return NextResponse.json(rows);
   } catch (error: any) {
-    console.error('❌ Error fetching contacts:', error.message);
+    console.error('❌ Error fetching universal contacts:', error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
