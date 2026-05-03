@@ -21,15 +21,14 @@ export default function RootLayout({
     <html lang="es">
       <body className={`${inter.variable} ${outfit.variable} font-inter bg-background text-foreground antialiased transition-colors duration-300`}>
         <ToastProvider>
-          <div className="flex min-h-screen relative">
+          <div className="flex flex-col md:flex-row min-h-screen relative">
             <Sidebar />
-            {/* Contenedor principal con padding-left dinámico se maneja en el CSS o con un wrapper flexible */}
-            <main className="flex-1 min-h-screen p-4 md:p-6 lg:p-8 relative overflow-hidden ml-[80px] md:ml-[240px] transition-[margin] duration-300">
+            <main className="flex-1 min-h-screen p-2 md:p-6 lg:p-8 relative overflow-hidden transition-all duration-300 w-full">
               {/* Elementos de fondo decorativos */}
               <div className="absolute top-[-5%] left-[-5%] w-[30%] h-[30%] bg-brand-purple/5 blur-[100px] rounded-full pointer-events-none" />
               <div className="absolute bottom-[-5%] right-[-5%] w-[30%] h-[30%] bg-brand-blue/5 blur-[100px] rounded-full pointer-events-none" />
               
-              <div className="relative z-10 max-w-7xl mx-auto">
+              <div className="relative z-10 w-full max-w-[1600px] mx-auto">
                 {children}
               </div>
             </main>
