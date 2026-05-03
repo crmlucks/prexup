@@ -8,8 +8,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Faltan parámetros de configuración' }, { status: 400 });
     }
 
-    // 1. Intentar crear la instancia en Evolution API
-    const createResponse = await fetch(`${serverUrl}/instance/create`, {
+    // 1. Verificar si la instancia ya existe y su estado
+    const statusRes = await fetch(`${serverUrl}/instance/connectionState/${instanceName}`, {
+      method: 'GET',
+      headers: { 'apikey': apiKey }
+    });
+    
+    const statusData = await statusRes.json();
+
+    // Si ya está conectado, no necesitamos QR
+    if (statusData.instance?.state === 'open') {
+      return NextResponse.json({
+        success: true,
+        status: 'connected',
+        message: 'WhatsApp ya está vinculado y activo.'
+      });
+    }
+
+    // 2. Si no está conectado, intentamos crearla (por si acaso no existe)
+    await fetch(`${serverUrl}/instance/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -17,31 +34,36 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         instanceName: instanceName,
-        token: apiKey, // Opcional: puedes definir un token específico
+        token: apiKey,
         qrcode: true
       })
     });
 
-    const createData = await createResponse.json();
-
-    // 2. Si la instancia ya existe o se creó, pedimos el QR
+    // 3. Solicitar un código QR fresco
     const qrResponse = await fetch(`${serverUrl}/instance/connect/${instanceName}`, {
       method: 'GET',
-      headers: {
-        'apikey': apiKey
-      }
+      headers: { 'apikey': apiKey }
     });
 
     const qrData = await qrResponse.json();
 
+    // Manejo de respuesta de Evolution v2
+    const qrBase64 = qrData.base64 || (qrData.code ? qrData.code : null);
+
+    if (!qrBase64) {
+      return NextResponse.json({ 
+        error: 'El servidor no devolvió un código QR. Intenta reiniciar la instancia en tu panel de Evolution.' 
+      }, { status: 500 });
+    }
+
     return NextResponse.json({
       success: true,
-      instance: createData.instance || instanceName,
-      qrcode: qrData.base64 || qrData.code || null
+      status: 'disconnected',
+      qrcode: qrBase64
     });
 
   } catch (error: any) {
-    console.error('Error connecting to Evolution:', error);
-    return NextResponse.json({ error: 'No se pudo conectar con el servidor VPS' }, { status: 500 });
+    console.error('❌ Error Evolution Connect:', error.message);
+    return NextResponse.json({ error: 'No se pudo comunicar con el VPS de Evolution. Revisa la URL y la API Key.' }, { status: 500 });
   }
 }
