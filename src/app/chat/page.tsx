@@ -637,7 +637,7 @@ export default function ChatPage() {
                         "p-3 rounded-xl transition-all shadow-lg flex items-center justify-center min-w-[44px]",
                         recording 
                           ? "bg-red-500 text-white shadow-red-500/30 animate-pulse" 
-                          : "bg-white/10 text-white hover:bg-white/20"
+                          : "bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20"
                       )}>
                       {recording ? <span className="w-2.5 h-2.5 bg-white rounded-sm" /> : <Mic size={18} />}
                     </button>

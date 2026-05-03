@@ -58,6 +58,21 @@ export async function GET() {
       log.push(`⚠ Error en quick_responses: ${e.message}`);
     }
 
+    // 2.5 Crear tabla chatbot_settings
+    try {
+      await connection.query(`CREATE TABLE IF NOT EXISTS chatbot_settings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        webhook_url VARCHAR(255) NULL,
+        prompt TEXT NULL,
+        is_active TINYINT(1) DEFAULT 0,
+        evolution_instance VARCHAR(100) DEFAULT 'chatprex',
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )`);
+      log.push('✔ Tabla "chatbot_settings" lista');
+    } catch (e: any) {
+      log.push(`⚠ Error en chatbot_settings: ${e.message}`);
+    }
+
     // 3. Verificar que chat_messages existe
     try {
       const [cols]: any = await connection.query('DESCRIBE chat_messages');

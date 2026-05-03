@@ -32,6 +32,53 @@ export default function ChatbotsPage() {
   const [instanceName, setInstanceName] = useState('chatprex');
   const [qrCode, setQrCode] = useState<string | null>(null);
 
+  const [n8nWebhookUrl, setN8nWebhookUrl] = useState('');
+  const [prompt, setPrompt] = useState('Eres un experto asesor inmobiliario de PrexUp. Tu objetivo es responder consultas de forma amable y profesional.');
+  const [isChatbotActive, setIsChatbotActive] = useState(false);
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  useEffect(() => {
+    // Load settings from API
+    fetch('/api/chatbots/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) {
+          if (data.webhook_url) setN8nWebhookUrl(data.webhook_url);
+          if (data.prompt) setPrompt(data.prompt);
+          if (data.is_active !== undefined) setIsChatbotActive(data.is_active === 1);
+          if (data.evolution_instance) setInstanceName(data.evolution_instance);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  const handleSaveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      const response = await fetch('/api/chatbots/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          webhook_url: n8nWebhookUrl, 
+          prompt: prompt, 
+          is_active: isChatbotActive, 
+          evolution_instance: instanceName 
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        showToast('Configuraciones guardadas correctamente', 'success');
+      } else {
+        showToast(data.error || 'Error al guardar configuraciones', 'error');
+      }
+    } catch (error) {
+      showToast('Error de conexión', 'error');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
   const handleConnect = async () => {
     if (!serverUrl || !apiKey || !instanceName) {
       showToast('Por favor completa todos los campos', 'error');
@@ -127,20 +174,20 @@ export default function ChatbotsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
               <div className="space-y-1">
                 <label className="text-[9px] font-black text-muted uppercase tracking-widest ml-0.5">URL DE EVOLUTION API</label>
-                <input type="text" value={serverUrl} onChange={(e) => setServerUrl(e.target.value)} className="w-full rounded-lg px-3 py-2 text-[11px] focus:outline-none focus:border-brand-purple/40" />
+                <input type="text" value={serverUrl} onChange={(e) => setServerUrl(e.target.value)} className="w-full rounded-lg px-3 py-2 text-[11px] bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-brand-purple/40 outline-none" />
               </div>
               <div className="space-y-1">
                 <label className="text-[9px] font-black text-muted uppercase tracking-widest ml-0.5">API KEY GLOBAL</label>
-                <input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} className="w-full rounded-lg px-3 py-2 text-[11px] focus:outline-none focus:border-brand-purple/40" />
+                <input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} className="w-full rounded-lg px-3 py-2 text-[11px] bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-brand-purple/40 outline-none" />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div className="space-y-1">
                 <label className="text-[9px] font-black text-muted uppercase tracking-widest ml-0.5">NOMBRE DE INSTANCIA</label>
-                <input type="text" value={instanceName} onChange={(e) => setInstanceName(e.target.value)} className="w-full rounded-lg px-3 py-2 text-[11px] focus:outline-none focus:border-brand-purple/40" />
+                <input type="text" value={instanceName} onChange={(e) => setInstanceName(e.target.value)} className="w-full rounded-lg px-3 py-2 text-[11px] bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-brand-purple/40 outline-none" />
               </div>
               <div className="flex items-end">
-                <button onClick={handleConnect} disabled={loading} className="w-full py-2 rounded-lg bg-gradient-brand text-white text-[11px] font-black shadow-lg shadow-brand-purple/20 hover:scale-[1.02] transition-all uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50">
+                <button onClick={handleConnect} disabled={loading} className="w-full py-2 rounded-lg bg-brand-purple text-white text-[11px] font-black shadow-lg shadow-brand-purple/20 hover:scale-[1.02] transition-all uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50">
                   {loading ? <Loader2 size={14} className="animate-spin" /> : <ShieldCheck size={14} />}
                   VINCULAR WHATSAPP
                 </button>
@@ -149,22 +196,32 @@ export default function ChatbotsPage() {
 
             <div className="w-full h-px bg-card-border my-8" />
             
-            <div className="flex items-center gap-2 mb-6"><div className="p-1.5 rounded-lg bg-brand-blue/10 text-brand-blue"><Cpu size={16} /></div><h2 className="text-lg font-bold font-outfit">Motor de IA Chatbot</h2></div>
+            <div className="flex items-center gap-2 mb-6"><div className="p-1.5 rounded-lg bg-brand-blue/10 text-brand-blue"><Cpu size={16} /></div><h2 className="text-lg font-bold font-outfit">Motor de IA Chatbot (n8n)</h2></div>
             <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-foreground/[0.02] border border-white/5 flex items-center justify-between">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-black/5 dark:border-white/5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-brand-purple/20 text-brand-purple"><Bot size={18} /></div>
-                  <div><h5 className="text-[12px] font-bold">IA Conversacional</h5><p className="text-[10px] text-muted">Activa respuestas automáticas con GPT-4.</p></div>
+                  <div><h5 className="text-[12px] font-bold text-slate-800 dark:text-white">IA Conversacional Automática</h5><p className="text-[10px] text-slate-500 dark:text-muted">Desviar mensajes entrantes a n8n para respuestas IA.</p></div>
                 </div>
-                <div className="w-10 h-5 bg-brand-purple rounded-full relative cursor-pointer"><div className="absolute right-1 top-0.5 w-4 h-4 bg-white rounded-full" /></div>
+                <div onClick={() => setIsChatbotActive(!isChatbotActive)} className={cn("w-10 h-5 rounded-full relative cursor-pointer transition-all", isChatbotActive ? "bg-brand-purple" : "bg-slate-300 dark:bg-white/10")}>
+                  <div className={cn("absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all", isChatbotActive ? "right-1" : "left-1")} />
+                </div>
               </div>
+              
+              <div className="space-y-1">
+                <label className="text-[9px] font-black text-muted uppercase tracking-widest ml-0.5">WEBHOOK URL DE N8N (RECEPCIÓN)</label>
+                <input type="text" placeholder="https://tu-n8n.com/webhook/..." value={n8nWebhookUrl} onChange={(e) => setN8nWebhookUrl(e.target.value)} className="w-full rounded-lg px-3 py-2 text-[11px] bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-brand-purple/40 outline-none" />
+              </div>
+
               <div className="space-y-1">
                 <label className="text-[9px] font-black text-muted uppercase tracking-widest ml-0.5">INSTRUCCIONES DEL SISTEMA (PROMPT)</label>
-                <textarea rows={4} defaultValue="Eres un experto asesor inmobiliario de PrexUp..." className="w-full rounded-lg p-3 text-[11px] focus:outline-none focus:border-brand-purple/40 resize-none" />
+                <textarea rows={4} value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Eres un experto asesor inmobiliario de PrexUp..." className="w-full rounded-lg p-3 text-[11px] bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-brand-purple/40 outline-none resize-none" />
               </div>
+              
               <div className="flex justify-end pt-2">
-                <button className="flex items-center gap-2 px-6 py-2 rounded-lg bg-foreground/10 text-foreground text-[10px] font-black hover:bg-foreground/20 transition-all uppercase tracking-widest">
-                  <Save size={14} /> GUARDAR TODO
+                <button onClick={handleSaveSettings} disabled={savingSettings} className="flex items-center gap-2 px-6 py-2 rounded-lg bg-slate-200 dark:bg-white/10 text-slate-800 dark:text-white text-[10px] font-black hover:bg-slate-300 dark:hover:bg-white/20 transition-all uppercase tracking-widest disabled:opacity-50">
+                  {savingSettings ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} 
+                  GUARDAR TODO
                 </button>
               </div>
             </div>
