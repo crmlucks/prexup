@@ -354,7 +354,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-80px)] flex rounded-2xl overflow-hidden border border-white/5 shadow-2xl bg-black/20 backdrop-blur-md">
+    <div className="h-[calc(100vh-80px)] flex rounded-2xl overflow-hidden border border-black/5 dark:border-white/5 shadow-2xl bg-white dark:bg-black/20 backdrop-blur-md transition-colors">
       {/* Hidden inputs for file uploads */}
       <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip" className="hidden" onChange={handleFileChange} />
       <input ref={imgRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
@@ -363,17 +363,17 @@ export default function ChatPage() {
 
       {/* --- SIDEBAR --- */}
       <div className={cn(
-        "w-full md:w-[320px] lg:w-[360px] border-r border-white/5 flex flex-col bg-black/40 flex-shrink-0",
+        "w-full md:w-[320px] lg:w-[360px] border-r border-black/5 dark:border-white/5 flex flex-col bg-slate-50 dark:bg-black/40 flex-shrink-0 transition-colors",
         mobileView === 'chat' ? "hidden md:flex" : "flex"
       )}>
-        <div className="p-4 border-b border-white/5">
+        <div className="p-4 border-b border-black/5 dark:border-white/5">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-lg font-black font-outfit">Chats</h1>
+            <h1 className="text-lg font-black font-outfit text-slate-800 dark:text-white">Chats</h1>
             <div className="flex gap-1.5">
-              <button onClick={() => setShowFilters(!showFilters)} className={cn("p-1.5 rounded-lg transition-colors", showFilters ? "bg-brand-purple/20 text-brand-purple" : "hover:bg-white/5 text-muted")}>
+              <button onClick={() => setShowFilters(!showFilters)} className={cn("p-1.5 rounded-lg transition-colors", showFilters ? "bg-brand-purple/20 text-brand-purple" : "hover:bg-black/5 dark:hover:bg-white/5 text-slate-500 dark:text-muted")}>
                 <Filter size={16} />
               </button>
-              <button onClick={fetchContacts} className="p-1.5 rounded-lg text-brand-purple hover:bg-white/5 transition-colors">
+              <button onClick={fetchContacts} className="p-1.5 rounded-lg text-brand-purple hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                 <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               </button>
             </div>
@@ -381,21 +381,21 @@ export default function ChatPage() {
 
           <div className="space-y-2">
             <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-muted" />
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar nombre, teléfono..." 
-                className="w-full pl-9 pr-3 py-2 rounded-xl text-[12px] bg-white/5 border border-white/10 focus:border-brand-purple/40 outline-none transition-all placeholder:text-muted/50" />
+                className="w-full pl-9 pr-3 py-2 rounded-xl text-[12px] bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-brand-purple/40 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-muted/50 text-slate-800 dark:text-white shadow-sm dark:shadow-none" />
             </div>
 
             <AnimatePresence>
               {showFilters && (
                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                   <div className="flex flex-wrap gap-1.5 pt-2">
-                    <button onClick={() => setStatusFilter('all')} className={cn("px-2 py-1 rounded-md text-[10px] font-bold border transition-all", statusFilter === 'all' ? "bg-white text-black border-white" : "bg-white/5 border-white/10 text-muted")}>
+                    <button onClick={() => setStatusFilter('all')} className={cn("px-2 py-1 rounded-md text-[10px] font-bold border transition-all", statusFilter === 'all' ? "bg-slate-800 text-white dark:bg-white dark:text-black border-transparent" : "bg-white dark:bg-white/5 border-black/10 dark:border-white/10 text-slate-500 dark:text-muted")}>
                       Todos
                     </button>
                     {LEAD_STATUSES.map(s => (
                       <button key={s.id} onClick={() => setStatusFilter(s.id)}
-                        className={cn("px-2 py-1 rounded-md text-[10px] font-bold border transition-all", statusFilter === s.id ? s.color : "bg-white/5 border-white/10 text-muted/70 hover:text-white")}>
+                        className={cn("px-2 py-1 rounded-md text-[10px] font-bold border transition-all", statusFilter === s.id ? s.color : "bg-white dark:bg-white/5 border-black/10 dark:border-white/10 text-slate-500 dark:text-muted/70 hover:text-slate-800 dark:hover:text-white")}>
                         {s.label}
                       </button>
                     ))}
@@ -410,7 +410,7 @@ export default function ChatPage() {
           {loading && contacts.length === 0 ? (
             <div className="h-full flex items-center justify-center"><Loader2 className="animate-spin text-brand-purple" size={24} /></div>
           ) : filteredContacts.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-muted/50 p-6 text-center">
+            <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-muted/50 p-6 text-center">
               <MessageCircle size={32} className="mb-3 opacity-20" />
               <p className="text-[12px] font-bold">Sin conversaciones</p>
               <p className="text-[10px]">Ajusta tus filtros de búsqueda</p>
@@ -421,14 +421,14 @@ export default function ChatPage() {
 
             return (
               <div key={c.phone} onClick={() => selectContact(c)}
-                className={cn("p-4 flex gap-3 cursor-pointer border-b border-white/[0.02] transition-all relative group",
-                  selected?.phone === c.phone ? "bg-brand-purple/10 border-l-2 border-l-brand-purple" : "hover:bg-white/[0.02]"
+                className={cn("p-4 flex gap-3 cursor-pointer border-b border-black/[0.02] dark:border-white/[0.02] transition-all relative group",
+                  selected?.phone === c.phone ? "bg-brand-purple/10 border-l-2 border-l-brand-purple" : "hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
                 )}>
                 
-                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-brand-purple/20 to-brand-blue/20 flex items-center justify-center border border-white/10 flex-shrink-0 relative">
-                  <span className="text-sm font-black text-white/90">{(c.name||'?')[0].toUpperCase()}</span>
+                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-brand-purple/20 to-brand-blue/20 flex items-center justify-center border border-brand-purple/10 dark:border-white/10 flex-shrink-0 relative">
+                  <span className="text-sm font-black text-brand-purple dark:text-white/90">{(c.name||'?')[0].toUpperCase()}</span>
                   {c.unread > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center text-[9px] font-bold text-white border border-black">
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center text-[9px] font-bold text-white border border-white dark:border-black">
                       {c.unread}
                     </span>
                   )}
@@ -436,19 +436,19 @@ export default function ChatPage() {
 
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                   <div className="flex justify-between items-center mb-0.5">
-                    <h3 className="font-bold text-[13px] text-white/90 truncate">{c.name || c.phone}</h3>
-                    <span className="text-[9px] text-muted/60 flex-shrink-0 font-medium">
+                    <h3 className="font-bold text-[13px] text-slate-800 dark:text-white/90 truncate">{c.name || c.phone}</h3>
+                    <span className="text-[9px] text-slate-400 dark:text-muted/60 flex-shrink-0 font-medium">
                       {c.time ? new Date(c.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : ''}
                     </span>
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <p className={cn("text-[11px] truncate pr-2 flex items-center gap-1", c.unread > 0 ? "text-white font-medium" : "text-muted/60")}>
+                    <p className={cn("text-[11px] truncate pr-2 flex items-center gap-1", c.unread > 0 ? "text-slate-800 dark:text-white font-medium" : "text-slate-500 dark:text-muted/60")}>
                       {c.lastMsgType !== 'text' && <span className="text-[10px]">📁</span>}
                       {c.lastMsg}
                     </p>
                     {c.status && (
-                      <span className={cn("text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border", statusColor)}>
+                      <span className={cn("text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border bg-white dark:bg-transparent", statusColor)}>
                         {statusLabel}
                       </span>
                     )}
@@ -462,38 +462,38 @@ export default function ChatPage() {
 
       {/* --- CHAT AREA --- */}
       <div className={cn(
-        "flex-1 flex flex-col relative min-w-0 bg-black/20",
+        "flex-1 flex flex-col relative min-w-0 bg-slate-50/50 dark:bg-black/20 transition-colors",
         mobileView === 'list' ? "hidden md:flex" : "flex"
       )}>
         {selected ? (
           <>
             {/* Chat Header */}
-            <div className="px-5 py-3 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-md flex-shrink-0 z-10 shadow-sm">
+            <div className="px-5 py-3 border-b border-black/5 dark:border-white/5 flex items-center justify-between bg-white/80 dark:bg-black/40 backdrop-blur-md flex-shrink-0 z-10 shadow-sm transition-colors">
               <div className="flex items-center gap-3">
-                <button onClick={() => setMobileView('list')} className="p-1.5 rounded-lg bg-white/5 text-muted md:hidden mr-1">
+                <button onClick={() => setMobileView('list')} className="p-1.5 rounded-lg bg-black/5 dark:bg-white/5 text-slate-500 dark:text-muted md:hidden mr-1 hover:bg-black/10 dark:hover:bg-white/10">
                   <ArrowLeft size={16} />
                 </button>
-                <div className="w-10 h-10 rounded-full bg-brand-purple/20 flex items-center justify-center border border-brand-purple/30">
+                <div className="w-10 h-10 rounded-full bg-brand-purple/10 dark:bg-brand-purple/20 flex items-center justify-center border border-brand-purple/20 dark:border-brand-purple/30">
                   <User size={18} className="text-brand-purple" />
                 </div>
                 <div className="flex flex-col">
-                  <h3 className="font-bold text-[14px] text-white/90 leading-tight flex items-center gap-2">
+                  <h3 className="font-bold text-[14px] text-slate-800 dark:text-white/90 leading-tight flex items-center gap-2">
                     {selected.name || selected.phone}
                   </h3>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                    <span className="text-[10px] text-emerald-500 dark:text-emerald-400 font-bold flex items-center gap-1">
                       <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" /> WhatsApp
                     </span>
-                    <span className="text-[10px] text-muted">•</span>
-                    <span className="text-[10px] text-muted font-medium">{selected.phone}</span>
+                    <span className="text-[10px] text-slate-400 dark:text-muted">•</span>
+                    <span className="text-[10px] text-slate-500 dark:text-muted font-medium">{selected.phone}</span>
                   </div>
                 </div>
               </div>
 
               {/* Status Editor directly in header */}
               <div className="flex items-center gap-3">
-                <div className="hidden lg:flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
-                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider">Etapa:</span>
+                <div className="hidden lg:flex items-center gap-2 bg-slate-100 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-black/5 dark:border-white/10">
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-muted uppercase tracking-wider">Etapa:</span>
                   <select 
                     value={selected.status} 
                     onChange={(e) => handleUpdateLeadStatus(e.target.value)}
@@ -502,24 +502,24 @@ export default function ChatPage() {
                       LEAD_STATUSES.find(s => s.id === selected.status)?.color.split(' ')[0]
                     )}
                   >
-                    {LEAD_STATUSES.map(s => <option key={s.id} value={s.id} className="bg-brand-dark text-white">{s.label}</option>)}
+                    {LEAD_STATUSES.map(s => <option key={s.id} value={s.id} className="bg-white text-slate-800 dark:bg-brand-dark dark:text-white">{s.label}</option>)}
                   </select>
                 </div>
-                <a href={`tel:${selected.phone}`} className="p-2 rounded-xl bg-white/5 text-muted hover:text-white hover:bg-white/10 border border-white/5 transition-all">
+                <a href={`tel:${selected.phone}`} className="p-2 rounded-xl bg-black/5 dark:bg-white/5 text-slate-500 dark:text-muted hover:text-slate-800 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 border border-transparent dark:border-white/5 transition-all">
                   <Phone size={16} />
                 </a>
               </div>
             </div>
 
             {/* Messages Area */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar bg-gradient-to-b from-transparent to-black/20">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar bg-slate-50/50 dark:bg-gradient-to-b dark:from-transparent dark:to-black/20">
               {messages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center opacity-30">
-                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 border border-white/10">
-                    <MessageCircle size={32} />
+                <div className="h-full flex flex-col items-center justify-center opacity-40 dark:opacity-30">
+                  <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center mb-4 border border-black/10 dark:border-white/10">
+                    <MessageCircle size={32} className="text-slate-500 dark:text-white" />
                   </div>
-                  <p className="text-[12px] font-bold uppercase tracking-wider">Comienza la conversación</p>
-                  <p className="text-[11px] mt-1 text-center max-w-xs">Envía un mensaje o utiliza una respuesta rápida para conectar con {selected.name}</p>
+                  <p className="text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-white">Comienza la conversación</p>
+                  <p className="text-[11px] mt-1 text-center max-w-xs text-slate-500 dark:text-white/70">Envía un mensaje o utiliza una respuesta rápida para conectar con {selected.name}</p>
                 </div>
               ) : messages.map((m, i) => {
                 const isMe = m.is_from_me === 1 || m.is_from_me === true;
@@ -528,12 +528,12 @@ export default function ChatPage() {
                     <div className={cn(
                       "max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 shadow-md relative group",
                       isMe 
-                        ? "bg-brand-purple/90 text-white rounded-tr-sm border border-brand-purple" 
-                        : "bg-white/10 text-white/90 rounded-tl-sm border border-white/5 backdrop-blur-sm"
+                        ? "bg-brand-purple/90 text-white rounded-tr-sm border border-brand-purple/20" 
+                        : "bg-white dark:bg-white/10 text-slate-800 dark:text-white/90 rounded-tl-sm border border-black/5 dark:border-white/5 backdrop-blur-sm"
                     )}>
                       {renderMessageContent(m)}
                       
-                      <div className={cn("flex items-center justify-end gap-1 mt-1.5", isMe ? "text-white/60" : "text-white/40")}>
+                      <div className={cn("flex items-center justify-end gap-1 mt-1.5", isMe ? "text-white/60" : "text-slate-400 dark:text-white/40")}>
                         <span className="text-[9px] font-medium tracking-wide">
                           {m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : ''}
                         </span>
@@ -556,23 +556,23 @@ export default function ChatPage() {
                 
                 {showAttach && (
                   <motion.div initial={{opacity:0,y:10, scale:0.95}} animate={{opacity:1,y:0, scale:1}} exit={{opacity:0,y:10, scale:0.95}}
-                    className="absolute bottom-16 left-3 bg-black/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl z-50">
+                    className="absolute bottom-16 left-3 bg-white dark:bg-black/95 backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-2xl p-2 shadow-2xl z-50">
                     <div className="flex flex-col gap-1 min-w-[180px]">
-                      <button onClick={() => { imgRef.current?.click(); }} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-brand-purple/20 text-left transition-all group">
-                        <div className="p-2 rounded-lg bg-blue-500/10 group-hover:bg-blue-500/20"><ImageIcon size={16} className="text-blue-400" /></div>
-                        <span className="text-[12px] font-bold">Imagen</span>
+                      <button onClick={() => { imgRef.current?.click(); }} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-brand-purple/20 text-left transition-all group">
+                        <div className="p-2 rounded-lg bg-blue-500/10 group-hover:bg-blue-500/20"><ImageIcon size={16} className="text-blue-500 dark:text-blue-400" /></div>
+                        <span className="text-[12px] font-bold text-slate-700 dark:text-white">Imagen</span>
                       </button>
-                      <button onClick={() => { vidRef.current?.click(); }} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-brand-purple/20 text-left transition-all group">
-                        <div className="p-2 rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20"><Video size={16} className="text-emerald-400" /></div>
-                        <span className="text-[12px] font-bold">Video</span>
+                      <button onClick={() => { vidRef.current?.click(); }} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-brand-purple/20 text-left transition-all group">
+                        <div className="p-2 rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20"><Video size={16} className="text-emerald-500 dark:text-emerald-400" /></div>
+                        <span className="text-[12px] font-bold text-slate-700 dark:text-white">Video</span>
                       </button>
-                      <button onClick={() => { audioRef.current?.click(); }} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-brand-purple/20 text-left transition-all group">
-                        <div className="p-2 rounded-lg bg-pink-500/10 group-hover:bg-pink-500/20"><Mic size={16} className="text-pink-400" /></div>
-                        <span className="text-[12px] font-bold">Audio</span>
+                      <button onClick={() => { audioRef.current?.click(); }} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-brand-purple/20 text-left transition-all group">
+                        <div className="p-2 rounded-lg bg-pink-500/10 group-hover:bg-pink-500/20"><Mic size={16} className="text-pink-500 dark:text-pink-400" /></div>
+                        <span className="text-[12px] font-bold text-slate-700 dark:text-white">Audio</span>
                       </button>
-                      <button onClick={() => { fileRef.current?.click(); }} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-brand-purple/20 text-left transition-all group">
-                        <div className="p-2 rounded-lg bg-amber-500/10 group-hover:bg-amber-500/20"><File size={16} className="text-amber-400" /></div>
-                        <span className="text-[12px] font-bold">Documento</span>
+                      <button onClick={() => { fileRef.current?.click(); }} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-brand-purple/20 text-left transition-all group">
+                        <div className="p-2 rounded-lg bg-amber-500/10 group-hover:bg-amber-500/20"><File size={16} className="text-amber-500 dark:text-amber-400" /></div>
+                        <span className="text-[12px] font-bold text-slate-700 dark:text-white">Documento</span>
                       </button>
                     </div>
                   </motion.div>
@@ -591,24 +591,24 @@ export default function ChatPage() {
             </div>
 
             {/* Input Bar */}
-            <div className="p-3 bg-black/40 backdrop-blur-md border-t border-white/5 flex-shrink-0">
+            <div className="p-3 bg-white/80 dark:bg-black/40 backdrop-blur-md border-t border-black/5 dark:border-white/5 flex-shrink-0">
               <form onSubmit={e => { e.preventDefault(); handleSendText(); }} className="flex items-end gap-2 max-w-5xl mx-auto">
                 <div className="flex gap-1 mb-1">
                   <button type="button" onClick={() => { setShowEmoji(!showEmoji); setShowAttach(false); setShowQuick(false); }}
-                    className={cn("p-2 rounded-xl transition-all", showEmoji ? "bg-white/10 text-white" : "text-muted hover:text-white hover:bg-white/5")}>
+                    className={cn("p-2 rounded-xl transition-all", showEmoji ? "bg-black/10 dark:bg-white/10 text-slate-800 dark:text-white" : "text-slate-500 dark:text-muted hover:text-slate-800 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5")}>
                     <Smile size={18} />
                   </button>
                   <button type="button" onClick={() => { setShowAttach(!showAttach); setShowEmoji(false); setShowQuick(false); }}
-                    className={cn("p-2 rounded-xl transition-all", showAttach ? "bg-white/10 text-white" : "text-muted hover:text-white hover:bg-white/5")}>
+                    className={cn("p-2 rounded-xl transition-all", showAttach ? "bg-black/10 dark:bg-white/10 text-slate-800 dark:text-white" : "text-slate-500 dark:text-muted hover:text-slate-800 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5")}>
                     <Paperclip size={18} />
                   </button>
                   <button type="button" onClick={() => { setShowQuick(!showQuick); setShowEmoji(false); setShowAttach(false); }}
-                    className={cn("p-2 rounded-xl transition-all", showQuick ? "bg-brand-purple/20 text-brand-purple" : "text-muted hover:text-brand-purple hover:bg-white/5")}>
+                    className={cn("p-2 rounded-xl transition-all", showQuick ? "bg-brand-purple/20 text-brand-purple" : "text-slate-500 dark:text-muted hover:text-brand-purple hover:bg-black/5 dark:hover:bg-white/5")}>
                     <Zap size={18} />
                   </button>
                 </div>
                 
-                <div className="flex-1 relative bg-white/5 border border-white/10 rounded-2xl overflow-hidden focus-within:border-brand-purple/50 focus-within:bg-white/10 transition-all">
+                <div className="flex-1 relative bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl overflow-hidden focus-within:border-brand-purple/50 focus-within:bg-slate-50 dark:focus-within:bg-white/10 transition-all shadow-sm dark:shadow-none">
                   <textarea 
                     value={input} 
                     onChange={e => setInput(e.target.value)}
@@ -620,7 +620,7 @@ export default function ChatPage() {
                     }}
                     placeholder="Escribe un mensaje..." 
                     rows={1}
-                    className="w-full bg-transparent px-4 py-3 text-[13px] focus:outline-none resize-none max-h-32 min-h-[44px] custom-scrollbar block"
+                    className="w-full bg-transparent px-4 py-3 text-[13px] focus:outline-none resize-none max-h-32 min-h-[44px] custom-scrollbar block text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-muted"
                     style={{ height: 'auto' }}
                   />
                 </div>
@@ -647,14 +647,14 @@ export default function ChatPage() {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center opacity-20 hidden md:flex">
-            <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center border border-white/10 mb-6">
-              <MessageCircle size={48} />
+          <div className="flex-1 flex flex-col items-center justify-center opacity-30 dark:opacity-20 hidden md:flex">
+            <div className="w-24 h-24 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center border border-black/10 dark:border-white/10 mb-6">
+              <MessageCircle size={48} className="text-slate-600 dark:text-white" />
             </div>
-            <p className="text-xl font-black font-outfit uppercase tracking-[0.3em] bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent">
+            <p className="text-xl font-black font-outfit uppercase tracking-[0.3em] bg-gradient-to-r from-slate-800 to-slate-400 dark:from-white dark:to-white/50 bg-clip-text text-transparent">
               PREXUP CHAT
             </p>
-            <p className="text-[12px] mt-2 font-medium tracking-widest uppercase">Selecciona un lead para comenzar</p>
+            <p className="text-[12px] mt-2 font-medium tracking-widest uppercase text-slate-500 dark:text-white/70">Selecciona un lead para comenzar</p>
           </div>
         )}
       </div>

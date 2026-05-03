@@ -93,8 +93,31 @@ export default function QuickResponseManager({ responses, onSend, onSave, onDele
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-            <input value={editing.media_url || ''} onChange={e => setEditing({ ...editing, media_url: e.target.value })}
-              placeholder="URL de imagen, video o documento (Opcional)" className="w-full px-3 py-1.5 rounded-lg text-[11px] bg-white/5 border border-white/10 focus:border-brand-purple/30 outline-none" />
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold text-slate-500 dark:text-muted uppercase flex items-center gap-1">
+                <Zap size={10} /> Adjuntar Multimedia (Opcional)
+              </label>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="file" 
+                  accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => setEditing({ ...editing, media_url: reader.result as string });
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="w-full text-[10px] file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-brand-purple file:text-white hover:file:bg-brand-purple/80 text-white/70"
+                />
+                {editing.media_url && (
+                  <button onClick={() => setEditing({ ...editing, media_url: undefined })} className="p-1 text-red-500 hover:bg-red-500/10 rounded" title="Eliminar adjunto">
+                    <Trash2 size={12} />
+                  </button>
+                )}
+              </div>
+            </div>
             <textarea value={editing.text || ''} onChange={e => setEditing({ ...editing, text: e.target.value })}
               placeholder="Mensaje de respuesta rápida..." rows={3}
               className="w-full px-3 py-2 rounded-lg text-[11px] bg-white/5 border border-white/10 focus:border-brand-purple/30 outline-none resize-none" />
@@ -112,18 +135,26 @@ export default function QuickResponseManager({ responses, onSend, onSave, onDele
         {mode === 'preview' && preview && (
           <motion.div key="preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
             <div className="text-[9px] font-black text-brand-purple uppercase mb-1">Vista Previa</div>
-            <div className="bg-brand-purple/90 text-white rounded-2xl rounded-tr-sm px-3 py-2 max-w-[80%] ml-auto shadow">
+            <div className="bg-brand-purple/90 text-white rounded-2xl rounded-tr-sm px-3 py-2 max-w-[80%] ml-auto shadow-md">
               {preview.media_url && (
-                <div className="mb-2 bg-black/20 p-2 rounded text-center text-[10px]">
-                  📎 Adjunto configurado
+                <div className="mb-2 bg-black/20 p-2 rounded text-center text-[10px] overflow-hidden">
+                  {preview.media_url.startsWith('data:image') ? (
+                    <img src={preview.media_url} alt="Adjunto" className="w-full max-h-32 object-cover rounded mb-1" />
+                  ) : preview.media_url.startsWith('data:video') ? (
+                    <video src={preview.media_url} controls className="w-full max-h-32 object-cover rounded mb-1" />
+                  ) : preview.media_url.startsWith('data:audio') ? (
+                    <audio src={preview.media_url} controls className="w-full mb-1" />
+                  ) : (
+                    "📎 Documento adjunto"
+                  )}
                 </div>
               )}
               <p className="text-[11px] leading-relaxed">{preview.text}</p>
             </div>
             <div className="flex justify-end gap-2 pt-1">
-              <button onClick={() => setMode('list')} className="px-3 py-1 rounded-lg text-[10px] font-bold text-muted hover:bg-white/5">Volver</button>
+              <button onClick={() => setMode('list')} className="px-3 py-1 rounded-lg text-[10px] font-bold text-slate-500 dark:text-muted hover:bg-black/5 dark:hover:bg-white/5">Volver</button>
               <button onClick={() => { onSend(preview.text, preview.media_url); onClose(); }}
-                className="px-3 py-1 rounded-lg text-[10px] font-bold bg-emerald-500 text-white">Enviar</button>
+                className="px-3 py-1 rounded-lg text-[10px] font-bold bg-emerald-500 text-white shadow-md shadow-emerald-500/20">Enviar</button>
             </div>
           </motion.div>
         )}
