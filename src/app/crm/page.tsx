@@ -90,14 +90,21 @@ export default function CRMPage() {
             </div>
           </div>
 
-          <div className="flex-1 space-y-4 p-3 bg-foreground/[0.02] rounded-3xl border-thin">
+          <div className={cn(
+            "flex-1 space-y-4 p-3 rounded-3xl border transition-all duration-500",
+            col.id === 'new' ? "border-blue-500/20 bg-blue-500/[0.02]" :
+            col.id === 'contacted' ? "border-purple-500/20 bg-purple-500/[0.02]" :
+            col.id === 'qualified' ? "border-amber-500/20 bg-amber-500/[0.02]" :
+            col.id === 'proposal' ? "border-emerald-500/20 bg-emerald-500/[0.02]" :
+            "border-brand-purple/20 bg-brand-purple/[0.02]"
+          )}>
             {leads
               .filter((lead) => lead.status === col.id)
               .map((lead) => (
                 <motion.div 
                   key={lead.id}
                   layoutId={lead.id.toString()}
-                  className="glass p-5 rounded-2xl border-thin shadow-sm hover:shadow-xl hover:border-brand-purple/30 transition-all cursor-grab active:cursor-grabbing bg-background/40 group"
+                  className="glass p-5 rounded-2xl border-thin shadow-sm hover:shadow-xl hover:border-brand-purple/30 transition-all cursor-grab active:cursor-grabbing bg-black/20 group"
                 >
                   <div className="flex justify-between items-start mb-3">
                     <span className="text-[9px] font-black uppercase tracking-widest text-brand-purple bg-brand-purple/10 px-2 py-0.5 rounded-md">{lead.source || 'WHATSAPP'}</span>
@@ -148,7 +155,14 @@ export default function CRMPage() {
             
             <button 
               onClick={() => { setEditingLead(null); setIsModalOpen(true); }}
-              className="w-full py-3 rounded-2xl border-2 border-dashed border-white/5 hover:border-brand-purple/20 hover:bg-brand-purple/5 text-muted hover:text-brand-purple transition-all text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2"
+              className={cn(
+                "w-full py-3 rounded-2xl border-2 border-dashed transition-all text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2",
+                col.id === 'new' ? "border-blue-500/10 text-blue-500/40 hover:border-blue-500/30 hover:bg-blue-500/5 hover:text-blue-500" :
+                col.id === 'contacted' ? "border-purple-500/10 text-purple-500/40 hover:border-purple-500/30 hover:bg-purple-500/5 hover:text-purple-500" :
+                col.id === 'qualified' ? "border-amber-500/10 text-amber-500/40 hover:border-amber-500/30 hover:bg-amber-500/5 hover:text-amber-500" :
+                col.id === 'proposal' ? "border-emerald-500/10 text-emerald-500/40 hover:border-emerald-500/30 hover:bg-emerald-500/5 hover:text-emerald-500" :
+                "border-brand-purple/10 text-brand-purple/40 hover:border-brand-purple/30 hover:bg-brand-purple/5 hover:text-brand-purple"
+              )}
             >
               <Plus size={14} /> Añadir Lead
             </button>
@@ -215,7 +229,7 @@ export default function CRMPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
              <h1 className="text-2xl font-black font-outfit tracking-tight">CRM PrexUp</h1>
-             <span className="bg-brand-purple/20 text-brand-purple text-[9px] font-black px-2 py-0.5 rounded-md border border-brand-purple/30 uppercase tracking-widest">v1.5 PRODUCTION</span>
+             <span className="bg-brand-purple/20 text-brand-purple text-[9px] font-black px-2 py-0.5 rounded-md border border-brand-purple/30 uppercase tracking-widest">v1.6 AESTHETIC</span>
           </div>
           <p className="text-muted text-[11px] font-medium uppercase tracking-wider">Gestión de Pipeline en tiempo real</p>
         </div>
