@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import mysql from 'mysql2/promise';
 
 export async function GET() {
-  console.log('🔧 Reparando auto-incremento de ID...');
+  console.log('☢️ Iniciando REINICIO TOTAL de la tabla leads...');
 
   try {
     const connection = await mysql.createConnection({
@@ -13,39 +13,40 @@ export async function GET() {
       database: process.env.DB_DATABASE || 'default'
     });
 
-    // 1. Forzar que el ID sea auto-incremental
-    // Nota: Esto también asegura que sea PRIMARY KEY si no lo era.
-    await connection.query("ALTER TABLE leads MODIFY COLUMN id INT AUTO_INCREMENT PRIMARY KEY");
+    // 1. ELIMINAR LA TABLA MAL CONFIGURADA
+    await connection.query("DROP TABLE IF EXISTS leads");
+    console.log('✅ Tabla vieja eliminada.');
 
-    // 2. Asegurar que las otras columnas existan (por si acaso)
-    const migrations = [
-      "ALTER TABLE leads ADD COLUMN IF NOT EXISTS email VARCHAR(255) AFTER phone",
-      "ALTER TABLE leads ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'new' AFTER email",
-      "ALTER TABLE leads ADD COLUMN IF NOT EXISTS source VARCHAR(50) AFTER status",
-      "ALTER TABLE leads ADD COLUMN IF NOT EXISTS project_interest VARCHAR(255) AFTER source",
-      "ALTER TABLE leads ADD COLUMN IF NOT EXISTS assigned_agent VARCHAR(255) AFTER project_interest",
-      "ALTER TABLE leads ADD COLUMN IF NOT EXISTS budget VARCHAR(50) AFTER assigned_agent",
-      "ALTER TABLE leads ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'USD' AFTER budget",
-      "ALTER TABLE leads ADD COLUMN IF NOT EXISTS details TEXT AFTER currency",
-      "ALTER TABLE leads ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
-      "ALTER TABLE leads ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
-    ];
+    // 2. CREAR LA TABLA DESDE CERO CON EL ESQUEMA PERFECTO
+    const createQuery = `
+      CREATE TABLE leads (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        phone VARCHAR(50) UNIQUE NOT NULL,
+        email VARCHAR(255),
+        status VARCHAR(50) DEFAULT 'new',
+        source VARCHAR(50) DEFAULT 'WhatsApp',
+        project_interest VARCHAR(255),
+        assigned_agent VARCHAR(255),
+        budget VARCHAR(50) DEFAULT '0',
+        currency VARCHAR(10) DEFAULT 'USD',
+        details TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `;
 
-    for (const query of migrations) {
-      try {
-        await connection.query(query);
-      } catch (err) {
-        console.warn('Migración saltada o ya aplicada:', err);
-      }
-    }
+    await connection.query(createQuery);
+    console.log('✅ Tabla nueva creada con Auto-Incremento.');
 
     await connection.end();
     return NextResponse.json({ 
       success: true, 
-      message: '🚀 ¡ID arreglado y esquema actualizado! Ya puedes guardar leads.' 
+      message: '🚀 ¡REINICIO EXITOSO! La tabla leads ha sido reconstruida. Ya puedes guardar leads sin errores.' 
     });
 
   } catch (error: any) {
+    console.error('❌ Error en el reinicio:', error.message);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
