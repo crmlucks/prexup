@@ -34,8 +34,7 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         number: cleanPhone,
-        options: { delay: 1200, presence: "composing" },
-        textMessage: { text }
+        text: text
       })
     });
 

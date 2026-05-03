@@ -39,19 +39,16 @@ export async function POST(req: Request) {
       else if (mimeType.startsWith('video/')) mediaType = 'video';
       else if (mimeType.startsWith('audio/')) mediaType = 'audio';
 
-      // Enviar a Evolution API
+      // Enviar a Evolution API v2
       const response = await fetch(`${evolutionUrl}/message/sendMedia/${instance}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'apikey': apiKey || '' },
         body: JSON.stringify({
           number: cleanPhone,
-          options: { delay: 1200, presence: "composing" },
-          mediaMessage: {
-            mediatype: mediaType,
-            caption: caption,
-            media: `data:${mimeType};base64,${base64}`,
-            fileName: fileName
-          }
+          mediatype: mediaType,
+          caption: caption,
+          media: `data:${mimeType};base64,${base64}`,
+          fileName: fileName
         })
       });
 
