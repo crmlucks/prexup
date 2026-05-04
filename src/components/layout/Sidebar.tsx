@@ -15,7 +15,8 @@ import {
   Moon,
   Sun,
   TrendingUp,
-  Zap
+  Zap,
+  Calendar as CalendarIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -37,11 +38,12 @@ export const Sidebar = () => {
 
   const menuItems = [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/' },
-    { name: 'Clientes CRM', icon: Users, href: '/crm' },
+    { name: 'Leads', icon: Users, href: '/crm' },
+    { name: 'Propiedades', icon: Home, href: '/properties' },
+    { name: 'Calendario', icon: CalendarIcon, href: '/calendar' },
+    { name: 'Finanzas', icon: PieChart, href: '/finance' },
     { name: 'Chat AI', icon: MessageSquare, href: '/chat' },
     { name: 'Chatbots', icon: Zap, href: '/chatbots' },
-    { name: 'Propiedades', icon: Home, href: '/properties' },
-    { name: 'Finanzas', icon: PieChart, href: '/finance' },
     { name: 'Ventas', icon: TrendingUp, href: '/sales' },
   ];
 

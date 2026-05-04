@@ -61,7 +61,7 @@ export default function ChatPage() {
   useEffect(() => {
     fetchContacts();
     fetchQuickResponses();
-    const iv = setInterval(fetchContacts, 15000); // Polling every 15s
+    const iv = setInterval(fetchContacts, 5000); // Polling every 5s for contacts
     return () => clearInterval(iv);
   }, []);
 
@@ -89,7 +89,7 @@ export default function ChatPage() {
     if (selected) {
       fetchMessages(selected.phone);
       // Setup interval to poll messages for selected chat
-      const msgIv = setInterval(() => fetchMessages(selected.phone, true), 5000);
+      const msgIv = setInterval(() => fetchMessages(selected.phone, true), 2000);
       return () => clearInterval(msgIv);
     }
   }, [selected]);
@@ -330,12 +330,18 @@ export default function ChatPage() {
     switch(m.message_type) {
       case 'image':
         return m.media_url ? 
-          <img src={m.media_url} alt="Image" className="w-full max-h-48 object-cover rounded-lg mb-1" /> : 
-          <p className="italic opacity-70">📷 Imagen</p>;
+          <img src={m.media_url.startsWith('data:') ? m.media_url : `data:image/jpeg;base64,${m.media_url}`} alt="Image" className="w-full max-h-48 object-cover rounded-lg mb-1" /> : 
+          <div className="w-full h-32 bg-black/5 dark:bg-white/5 rounded-lg mb-1 flex items-center justify-center flex-col gap-2">
+            <ImageIcon size={24} className="text-slate-400" />
+            <span className="text-[9px] font-medium text-slate-500">Imagen adjunta</span>
+          </div>;
       case 'video':
         return m.media_url ? 
           <video src={m.media_url} controls className="w-full max-h-48 rounded-lg mb-1" /> : 
-          <p className="italic opacity-70">🎬 Video</p>;
+          <div className="w-full h-32 bg-black/5 dark:bg-white/5 rounded-lg mb-1 flex items-center justify-center flex-col gap-2">
+            <Video size={24} className="text-slate-400" />
+            <span className="text-[9px] font-medium text-slate-500">Video adjunto</span>
+          </div>;
       case 'audio':
         return m.media_url ? 
           <audio src={m.media_url} controls className="w-full max-w-[200px] mb-1" /> : 
@@ -512,16 +518,27 @@ export default function ChatPage() {
             </div>
 
             {/* Messages Area */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar bg-slate-50/50 dark:bg-gradient-to-b dark:from-transparent dark:to-black/20">
-              {messages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center opacity-40 dark:opacity-30">
-                  <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center mb-4 border border-black/10 dark:border-white/10">
-                    <MessageCircle size={32} className="text-slate-500 dark:text-white" />
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar bg-[#E5DDD5] dark:bg-[#0b141a] relative">
+              {/* WhatsApp background pattern overlay */}
+              <div 
+                className="absolute inset-0 z-0 opacity-[0.06] dark:opacity-[0.04] pointer-events-none mix-blend-multiply dark:mix-blend-overlay" 
+                style={{
+                  backgroundImage: "url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')",
+                  backgroundRepeat: 'repeat',
+                  backgroundSize: '400px'
+                }}
+              />
+              
+              <div className="relative z-10 flex flex-col h-full space-y-4 justify-end">
+                {messages.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center opacity-40 dark:opacity-30">
+                    <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center mb-4 border border-black/10 dark:border-white/10">
+                      <MessageCircle size={32} className="text-slate-500 dark:text-white" />
+                    </div>
+                    <p className="text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-white">Comienza la conversación</p>
+                    <p className="text-[11px] mt-1 text-center max-w-xs text-slate-500 dark:text-white/70">Envía un mensaje o utiliza una respuesta rápida para conectar con {selected.name}</p>
                   </div>
-                  <p className="text-[12px] font-bold uppercase tracking-wider text-slate-700 dark:text-white">Comienza la conversación</p>
-                  <p className="text-[11px] mt-1 text-center max-w-xs text-slate-500 dark:text-white/70">Envía un mensaje o utiliza una respuesta rápida para conectar con {selected.name}</p>
-                </div>
-              ) : messages.map((m, i) => {
+                ) : messages.map((m, i) => {
                 const isMe = m.is_from_me === 1 || m.is_from_me === true;
                 return (
                   <div key={m.id||i} className={cn("flex", isMe ? "justify-end" : "justify-start")}>
@@ -543,8 +560,8 @@ export default function ChatPage() {
                       </div>
                     </div>
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
 
             {/* Overlays (Emoji, Attach, Quick) */}

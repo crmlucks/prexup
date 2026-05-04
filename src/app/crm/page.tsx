@@ -123,13 +123,13 @@ export default function CRMPage() {
                   draggable
                   onDragStart={(e) => e.dataTransfer.setData("leadId", lead.id.toString())}
                   layoutId={lead.id.toString()}
-                  className="glass p-5 rounded-2xl border-thin shadow-sm hover:shadow-xl hover:border-brand-purple/30 transition-all cursor-grab active:cursor-grabbing bg-black/20 group relative overflow-hidden"
+                  className="glass p-5 rounded-2xl border-thin shadow-sm hover:shadow-xl hover:border-brand-purple/30 transition-all cursor-grab active:cursor-grabbing bg-white dark:bg-black/20 group relative overflow-hidden"
                 >
                   {/* Indicador de arrastre */}
                   <div className="absolute top-0 left-0 w-1 h-full bg-brand-purple/30 group-hover:bg-brand-purple transition-all" />
                   
                   {/* NOMBRE + TELÉFONO ARRIBA */}
-                  <h4 className="font-bold text-[13px] text-white/90 leading-tight mb-0.5 pl-2">{lead.name}</h4>
+                  <h4 className="font-bold text-[13px] text-slate-800 dark:text-white/90 leading-tight mb-0.5 pl-2">{lead.name}</h4>
                   <div className="flex items-center gap-1.5 text-brand-purple pl-2 mb-3">
                     <Phone size={10} />
                     <span className="text-[11px] font-medium">{lead.phone}</span>
@@ -137,18 +137,20 @@ export default function CRMPage() {
 
                   {/* DETALLES */}
                   <div className="flex items-center justify-between mb-3 pl-2">
-                    <span className="text-[8px] font-black uppercase tracking-widest text-brand-purple/70 bg-brand-purple/10 px-1.5 py-0.5 rounded">{lead.source || 'WHATSAPP'}</span>
                     <span className="text-[11px] font-bold text-emerald-500">${lead.budget || '0'} <span className="text-[8px] opacity-50">{lead.currency}</span></span>
                   </div>
                   {lead.project_interest && (
                     <p className="text-[10px] text-muted/60 pl-2 mb-2 truncate">{lead.project_interest}</p>
                   )}
 
-                  {/* ACCIONES — iconos reducidos */}
-                  <div className="flex items-center justify-end gap-1 pt-2 border-t border-white/5">
-                    <button onClick={() => handleEdit(lead)} title="Editar" className="p-1.5 rounded-lg bg-white/5 hover:bg-brand-purple/10 text-muted hover:text-brand-purple transition-all"><Edit2 size={12} /></button>
-                    <Link href="/chat" title="Chat" className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 hover:scale-110 transition-all"><MessageCircle size={12} /></Link>
-                    <button onClick={() => handleDelete(lead.id)} title="Eliminar" className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all"><Trash2 size={12} /></button>
+                  {/* ACCIONES — origen a la izquierda, iconos a la derecha */}
+                  <div className="flex items-center justify-between pt-2 border-t border-black/5 dark:border-white/5">
+                    <span className="text-[8px] font-black uppercase tracking-widest text-brand-purple/70 bg-brand-purple/10 px-1.5 py-0.5 rounded ml-2">{lead.source || 'WHATSAPP'}</span>
+                    <div className="flex items-center justify-end gap-1">
+                      <button onClick={() => handleEdit(lead)} title="Editar" className="p-1.5 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-brand-purple/10 text-slate-500 dark:text-muted hover:text-brand-purple transition-all"><Edit2 size={12} /></button>
+                      <Link href="/chat" title="Chat" className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 hover:scale-110 transition-all"><MessageCircle size={12} /></Link>
+                      <button onClick={() => handleDelete(lead.id)} title="Eliminar" className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all"><Trash2 size={12} /></button>
+                    </div>
                   </div>
                 </motion.div>
               ))}
