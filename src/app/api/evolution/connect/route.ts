@@ -39,7 +39,25 @@ export async function POST(req: Request) {
       })
     });
 
-    // 3. Solicitar un código QR fresco
+    // 3. Configurar el Webhook automáticamente para que los mensajes lleguen al CRM
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.chatprex.com';
+    await fetch(`${serverUrl}/webhook/set/${instanceName}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': apiKey
+      },
+      body: JSON.stringify({
+        webhook: {
+          url: `${appUrl}/api/chat/webhook`,
+          byEvents: false,
+          base64: false,
+          events: ["MESSAGES_UPSERT"]
+        }
+      })
+    }).catch(err => console.error("Error seteando webhook automático:", err));
+
+    // 4. Solicitar un código QR fresco
     const qrResponse = await fetch(`${serverUrl}/instance/connect/${instanceName}`, {
       method: 'GET',
       headers: { 'apikey': apiKey }
