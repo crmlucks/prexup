@@ -329,19 +329,23 @@ export default function ChatPage() {
   const renderMessageContent = (m: any) => {
     switch(m.message_type) {
       case 'image':
-        return m.media_url ? 
-          <img src={m.media_url.startsWith('data:') ? m.media_url : `data:image/jpeg;base64,${m.media_url}`} alt="Image" className="w-full max-h-48 object-cover rounded-lg mb-1" /> : 
+        return m.media_url ? (
+          <img src={m.media_url.startsWith('data:') ? m.media_url : `data:image/jpeg;base64,${m.media_url}`} alt="Image" className="w-full max-h-48 object-cover rounded-lg mb-1" />
+        ) : (
           <div className="w-full h-32 bg-black/5 dark:bg-white/5 rounded-lg mb-1 flex items-center justify-center flex-col gap-2">
             <ImageIcon size={24} className="text-slate-400" />
             <span className="text-[9px] font-medium text-slate-500">Imagen adjunta</span>
-          </div>;
+          </div>
+        );
       case 'video':
-        return m.media_url ? 
-          <video src={m.media_url} controls className="w-full max-h-48 rounded-lg mb-1" /> : 
+        return m.media_url ? (
+          <video src={m.media_url} controls className="w-full max-h-48 rounded-lg mb-1" />
+        ) : (
           <div className="w-full h-32 bg-black/5 dark:bg-white/5 rounded-lg mb-1 flex items-center justify-center flex-col gap-2">
             <Video size={24} className="text-slate-400" />
             <span className="text-[9px] font-medium text-slate-500">Video adjunto</span>
-          </div>;
+          </div>
+        );
       case 'audio':
         return m.media_url ? 
           <audio src={m.media_url} controls className="w-full max-w-[200px] mb-1" /> : 
