@@ -563,6 +563,7 @@ export default function ChatPage() {
                         {isMe && (
                           <CheckCheck size={12} className={m.is_read ? "text-blue-300" : ""} />
                         )}
+                      </div>
                     </div>
                   </div>
                 );
