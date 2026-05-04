@@ -347,9 +347,11 @@ export default function ChatPage() {
           </div>
         );
       case 'audio':
-        return m.media_url ? 
-          <audio src={m.media_url} controls className="w-full max-w-[200px] mb-1" /> : 
-          <p className="italic opacity-70 flex items-center gap-1"><Mic size={12}/> Audio</p>;
+        return m.media_url ? (
+          <audio src={m.media_url} controls className="w-full max-w-[200px] mb-1" />
+        ) : (
+          <p className="italic opacity-70 flex items-center gap-1"><Mic size={12}/> Audio</p>
+        );
       case 'document':
         return (
           <a href={m.media_url || '#'} target="_blank" rel="noreferrer" className="flex items-center gap-2 p-2 bg-black/20 rounded-lg mb-1 hover:bg-black/30 transition-colors">
