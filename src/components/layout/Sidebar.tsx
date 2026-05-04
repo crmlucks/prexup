@@ -43,9 +43,9 @@ export const Sidebar = () => {
   return (
     <aside
       className={cn(
-        "glass border-primary-subtle z-50 flex transition-all duration-300 sticky top-0",
-        "md:flex-col md:h-screen md:border-r md:border-b-0 border-b",
-        "flex-row w-full h-auto overflow-x-hidden md:overflow-visible items-center px-1 py-1 md:p-0",
+        "glass border-primary-subtle z-50 flex transition-all duration-300",
+        "fixed bottom-0 left-0 w-full border-t md:border-t-0 md:sticky md:top-0 md:border-r md:h-screen md:flex-col",
+        "flex-row items-center px-2 py-2 md:p-0 overflow-x-auto md:overflow-visible custom-scrollbar",
         isCollapsed ? "md:w-[80px]" : "md:w-[240px]"
       )}
     >
@@ -53,13 +53,13 @@ export const Sidebar = () => {
       <div className="p-2 md:p-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-brand-purple rounded-lg flex items-center justify-center shrink-0">
-            <span className="text-white font-bold">P</span>
+            <span className="text-white font-bold">C</span>
           </div>
           <span className={cn(
             "font-outfit font-bold text-xl tracking-tight hidden md:block transition-all overflow-hidden whitespace-nowrap",
             isCollapsed ? "w-0 opacity-0" : "w-[80px] opacity-100"
           )}>
-            PrexUp
+            ChatPrex
           </span>
         </div>
         
@@ -72,13 +72,13 @@ export const Sidebar = () => {
       </div>
 
       {/* Menu Items */}
-      <nav className="flex flex-row md:flex-col md:flex-1 px-1 md:px-3 md:py-4 gap-1 md:space-y-1 overflow-x-auto custom-scrollbar flex-nowrap shrink-0 md:shrink">
+      <nav className="flex flex-row md:flex-col md:flex-1 px-1 md:px-3 md:py-4 gap-2 md:space-y-1 flex-nowrap shrink-0 md:shrink items-center md:items-stretch">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link key={item.name} href={item.href}>
               <div className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative",
+                "flex items-center justify-center md:justify-start gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative",
                 isActive 
                   ? "bg-brand-purple text-white shadow-md shadow-brand-purple/20" 
                   : "text-slate-500 dark:text-muted hover:bg-black/5 dark:hover:bg-white/5 hover:text-slate-800 dark:hover:text-white"
@@ -104,7 +104,7 @@ export const Sidebar = () => {
       </nav>
 
       {/* Footer Actions */}
-      <div className="flex flex-row md:flex-col p-1 md:p-3 md:border-t border-primary-subtle gap-1 md:space-y-1 shrink-0 ml-auto md:ml-0 border-l md:border-l-0 border-primary-subtle pl-2 md:pl-3">
+      <div className="flex flex-row md:flex-col p-1 md:p-3 md:border-t border-primary-subtle gap-1 md:space-y-1 shrink-0 ml-auto md:ml-0 border-l md:border-l-0 pl-2 md:pl-3">
         <button 
           onClick={toggleTheme}
           className="flex items-center justify-center gap-3 px-3 py-2 rounded-lg text-slate-500 dark:text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-all group"

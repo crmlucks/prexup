@@ -12,15 +12,15 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         brand: {
-          purple: "#C000FF",
-          blue: "#002080",
+          purple: "#00bf52",
+          blue: "#008f3d",
           magenta: "#FF00FF",
           dark: "#0A0A0A",
           glass: "rgba(255, 255, 255, 0.05)",
         },
       },
       backgroundImage: {
-        "gradient-brand": "linear-gradient(to bottom right, #C000FF, #002080)",
+        "gradient-brand": "linear-gradient(to bottom right, #00bf52, #008f3d)",
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
