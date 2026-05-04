@@ -11,7 +11,6 @@ import {
   Square,
   Home,
   Tag,
-  Tag,
   ChevronRight,
   Heart,
   LayoutGrid,
