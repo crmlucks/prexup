@@ -28,6 +28,8 @@ export default function CRMPage() {
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingLead, setEditingLead] = useState<any>(null);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [filters, setFilters] = useState({ source: 'all', budgetMin: '', budgetMax: '' });
 
   useEffect(() => {
     fetchLeads();
@@ -279,21 +281,78 @@ export default function CRMPage() {
         </div>
       </div>
 
-      {/* Barra de búsqueda */}
-      <div className="flex flex-col md:flex-row gap-4 items-center bg-foreground/[0.01] p-2 rounded-2xl border-thin">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={16} />
-          <input 
-            type="text" 
-            placeholder="Buscar por nombre, teléfono o proyecto..." 
-            className="w-full bg-white/5 border-thin rounded-xl pl-12 pr-4 py-3 text-[13px] font-medium focus:outline-none focus:border-brand-purple/50 transition-all shadow-inner"
-          />
+      {/* Barra de búsqueda y Filtros Avanzados */}
+      <div className="flex flex-col gap-3 p-3 rounded-2xl border border-brand-purple/20 bg-brand-purple/[0.02] shadow-sm transition-all">
+        <div className="flex flex-col md:flex-row gap-3 items-center">
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-purple/60" size={16} />
+            <input 
+              type="text" 
+              placeholder="Buscar por nombre, teléfono o proyecto..." 
+              className="w-full bg-white dark:bg-black/40 border border-brand-purple/10 rounded-xl pl-12 pr-4 py-2.5 text-[13px] font-medium focus:outline-none focus:border-brand-purple/50 transition-all shadow-inner text-slate-800 dark:text-white"
+            />
+          </div>
+          <div className="flex gap-2 w-full md:w-auto">
+            <button 
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className={cn(
+                "flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-[11px] font-black tracking-widest transition-all border",
+                showAdvancedFilters 
+                  ? "bg-brand-purple/10 border-brand-purple/30 text-brand-purple" 
+                  : "bg-white dark:bg-white/5 border-brand-purple/10 text-slate-600 dark:text-muted hover:border-brand-purple/30 hover:text-brand-purple"
+              )}>
+              <Filter size={14} /> Filtro Avanzado
+            </button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-5 py-3 bg-white/5 border-thin rounded-xl text-[11px] font-black uppercase tracking-widest text-muted hover:text-brand-purple transition-all">
-            <Filter size={14} /> Filtros
-          </button>
-        </div>
+
+        <AnimatePresence>
+          {showAdvancedFilters && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-3 border-t border-brand-purple/10 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black tracking-widest text-brand-purple/70">ORIGEN DEL LEAD</label>
+                  <select 
+                    value={filters.source}
+                    onChange={(e) => setFilters({...filters, source: e.target.value})}
+                    className="w-full bg-white dark:bg-black/40 border border-brand-purple/10 rounded-lg px-3 py-2 text-[12px] text-slate-800 dark:text-white outline-none focus:border-brand-purple/50"
+                  >
+                    <option value="all">Todos los orígenes</option>
+                    <option value="WHATSAPP">WhatsApp</option>
+                    <option value="FACEBOOK">Facebook Ads</option>
+                    <option value="WEB">Sitio Web</option>
+                    <option value="MANUAL">Manual</option>
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black tracking-widest text-brand-purple/70">PRESUPUESTO MIN ($)</label>
+                  <input 
+                    type="number" 
+                    placeholder="Ej. 50000"
+                    value={filters.budgetMin}
+                    onChange={(e) => setFilters({...filters, budgetMin: e.target.value})}
+                    className="w-full bg-white dark:bg-black/40 border border-brand-purple/10 rounded-lg px-3 py-2 text-[12px] text-slate-800 dark:text-white outline-none focus:border-brand-purple/50"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black tracking-widest text-brand-purple/70">PRESUPUESTO MAX ($)</label>
+                  <input 
+                    type="number" 
+                    placeholder="Ej. 200000"
+                    value={filters.budgetMax}
+                    onChange={(e) => setFilters({...filters, budgetMax: e.target.value})}
+                    className="w-full bg-white dark:bg-black/40 border border-brand-purple/10 rounded-lg px-3 py-2 text-[12px] text-slate-800 dark:text-white outline-none focus:border-brand-purple/50"
+                  />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Contenido Principal */}

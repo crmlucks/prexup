@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   Home, 
@@ -10,33 +10,74 @@ import {
   Sparkles,
   Zap,
   MessageCircle,
-  TrendingUp
+  TrendingUp,
+  Loader2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-const stats = [
-  { label: 'Leads Totales', value: '1,284', change: '+12.5%', trend: 'up', icon: Users, color: 'text-blue-500' },
-  { label: 'Propiedades', value: '432', change: '+3.2%', trend: 'up', icon: Home, color: 'text-purple-500' },
-  { label: 'Tratos Activos', value: '48', change: '-2.4%', trend: 'down', icon: TrendingUp, color: 'text-pink-500' },
-  { label: 'Ingresos Totales', value: '$4.2M', change: '+18.7%', trend: 'up', icon: DollarSign, color: 'text-emerald-500' },
-];
+import Link from 'next/link';
 
 export default function Dashboard() {
+  const [leads, setLeads] = useState<any[]>([]);
+  const [propertiesCount, setPropertiesCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [leadsRes, propsRes] = await Promise.all([
+          fetch('/api/leads'),
+          fetch('/api/properties').catch(() => null)
+        ]);
+        
+        if (leadsRes.ok) {
+          const leadsData = await leadsRes.json();
+          setLeads(leadsData);
+        }
+        
+        if (propsRes && propsRes.ok) {
+          const propsData = await propsRes.json();
+          setPropertiesCount(propsData.length || 0);
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard data", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  const totalLeads = leads.length;
+  const activeDeals = leads.filter(l => l.status !== 'closed' && l.status !== 'lost').length;
+  const totalPipelineValue = leads
+    .filter(l => l.status !== 'closed' && l.status !== 'lost')
+    .reduce((sum, l) => sum + (Number(l.budget) || 0), 0);
+
+  const formatCurrency = (value: number) => {
+    if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `$${(value / 1000).toFixed(1)}k`;
+    return `$${value}`;
+  };
+
+  const stats = [
+    { label: 'Leads Totales', value: loading ? '...' : totalLeads.toString(), change: '+12%', trend: 'up', icon: Users, color: 'text-blue-500' },
+    { label: 'Propiedades', value: loading ? '...' : propertiesCount.toString(), change: '+3%', trend: 'up', icon: Home, color: 'text-purple-500' },
+    { label: 'Tratos Activos', value: loading ? '...' : activeDeals.toString(), change: '+5%', trend: 'up', icon: TrendingUp, color: 'text-pink-500' },
+    { label: 'Pipeline (Valor)', value: loading ? '...' : formatCurrency(totalPipelineValue), change: '+18%', trend: 'up', icon: DollarSign, color: 'text-emerald-500' },
+  ];
+
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in pb-20">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold font-outfit tracking-tight">Panel de Control</h1>
-          <p className="text-muted text-xs mt-0.5">Bienvenido de nuevo, Alex. Esto es lo que sucede hoy.</p>
+          <p className="text-muted text-[11px] mt-0.5 uppercase tracking-wider font-semibold">Resumen de Actividades en Tiempo Real</p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="px-3 py-1.5 rounded-lg glass-hover text-xs font-medium border border-card-border transition-all">
-            Exportar Informe
-          </button>
-          <button className="px-3 py-1.5 rounded-lg bg-gradient-brand text-white text-xs font-semibold shadow-lg shadow-brand-purple/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
-            + Nueva Propiedad
-          </button>
+          <Link href="/crm" className="px-4 py-2 rounded-xl bg-brand-purple text-white text-[10px] uppercase tracking-widest font-black shadow-lg shadow-brand-purple/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+            Ir al CRM
+          </Link>
         </div>
       </div>
 
@@ -48,7 +89,7 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1 }}
             key={stat.label} 
-            className="glass p-4 rounded-xl relative group overflow-hidden border-thin hover:border-primary-brand transition-all"
+            className="glass p-4 rounded-xl relative group overflow-hidden border-thin hover:border-brand-purple transition-all"
           >
             <div className="flex items-center justify-between mb-3">
               <div className={`p-2 rounded-lg bg-foreground/5 ${stat.color}`}>
@@ -62,7 +103,7 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="space-y-0.5">
-              <h3 className="text-muted text-[10px] font-semibold uppercase tracking-wider">{stat.label}</h3>
+              <h3 className="text-muted text-[10px] font-black uppercase tracking-wider">{stat.label}</h3>
               <p className="text-xl font-bold tracking-tight">{stat.value}</p>
             </div>
           </motion.div>
@@ -107,9 +148,9 @@ export default function Dashboard() {
           
           <div className="space-y-3">
             {[
-              { title: 'Leads Calientes', desc: 'Los leads de WhatsApp subieron un 22%. 5 prospectos listos.', icon: Zap, color: 'text-yellow-500' },
-              { title: 'Recomendación IA', desc: 'Coincidencia para "Villa Beachfront" con 3 leads activos.', icon: MessageCircle, color: 'text-blue-500' },
-              { title: 'Alerta Seguimiento', desc: 'Juan Pérez espera respuesta hace 4h. Riesgo de fuga.', icon: TrendingUp, color: 'text-red-500' }
+              { title: 'Leads Calientes', desc: `Detectados ${Math.max(1, Math.floor(activeDeals * 0.2))} prospectos con alta probabilidad de cierre.`, icon: Zap, color: 'text-yellow-500' },
+              { title: 'Oportunidad de Venta', desc: 'Sugerencia de contactar leads inactivos con ofertas nuevas.', icon: MessageCircle, color: 'text-blue-500' },
+              { title: 'Alerta Seguimiento', desc: 'Hay leads en fase de propuesta esperando respuesta.', icon: TrendingUp, color: 'text-red-500' }
             ].map((insight, i) => (
               <div key={i} className="p-3 rounded-lg bg-foreground/5 border border-transparent hover:border-brand-purple/20 transition-all cursor-pointer group">
                 <div className="flex gap-3">
@@ -125,53 +166,65 @@ export default function Dashboard() {
             ))}
           </div>
           
-          <button className="mt-auto w-full pt-4 text-[11px] font-bold text-brand-purple hover:text-brand-magenta transition-colors border-t border-card-border">
-            Ver todos los reportes IA
+          <button className="mt-auto w-full pt-4 text-[11px] font-bold text-brand-purple hover:scale-105 transition-all border-t border-card-border uppercase tracking-widest">
+            Actualizar Análisis
           </button>
         </div>
       </div>
 
       {/* Recent Leads Table */}
-      <div className="glass rounded-xl p-5">
+      <div className="glass rounded-xl p-5 border-thin hover:border-brand-purple/30 transition-all">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold">Leads Recientes (WhatsApp)</h2>
-          <button className="text-[11px] text-brand-purple font-bold">Ver todos</button>
+          <h2 className="text-sm font-semibold">Leads Recientes</h2>
+          <Link href="/crm" className="text-[10px] uppercase font-black tracking-widest text-brand-purple hover:scale-105 transition-all">Ver todos en CRM</Link>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="text-[10px] text-muted uppercase tracking-widest border-b border-card-border">
-                <th className="pb-2 font-semibold">Cliente</th>
-                <th className="pb-2 font-semibold">Teléfono</th>
-                <th className="pb-2 font-semibold">Estado</th>
-                <th className="pb-2 font-semibold">Presupuesto</th>
-                <th className="pb-2 font-semibold text-right">Acción</th>
+              <tr className="text-[9px] font-black text-muted uppercase tracking-widest border-b border-card-border">
+                <th className="pb-3">Cliente</th>
+                <th className="pb-3">Contacto</th>
+                <th className="pb-3">Origen / Etapa</th>
+                <th className="pb-3">Presupuesto</th>
+                <th className="pb-3 text-right">Acción</th>
               </tr>
             </thead>
             <tbody className="text-[11px]">
-              {[
-                { name: 'Sarah Miller', phone: '+1 234 567 890', status: 'Calificado', budget: '$450k - $600k' },
-                { name: 'David Chen', phone: '+1 987 654 321', status: 'Nuevo', budget: '$1.2M - $1.5M' },
-                { name: 'Michael Ross', phone: '+1 456 789 012', status: 'Propuesta', budget: '$800k - $900k' },
-                { name: 'Elena Gomez', phone: '+1 321 654 098', status: 'Ganado', budget: '$2.5M' },
-              ].map((lead, i) => (
-                <tr key={i} className="group hover:bg-foreground/[0.02] transition-colors border-b border-card-border last:border-0">
-                  <td className="py-2.5 font-bold">{lead.name}</td>
-                  <td className="py-2.5 text-muted">{lead.phone}</td>
-                  <td className="py-2.5">
-                    <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${
-                      lead.status === 'Ganado' ? 'bg-emerald-500/10 text-emerald-500' : 
-                      lead.status === 'Calificado' ? 'bg-blue-500/10 text-blue-500' :
-                      lead.status === 'Propuesta' ? 'bg-purple-500/10 text-purple-500' : 'bg-muted/10 text-muted'
-                    }`}>
-                      {lead.status}
-                    </span>
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center">
+                    <Loader2 size={24} className="animate-spin text-brand-purple mx-auto mb-2" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted">Cargando Leads...</span>
                   </td>
-                  <td className="py-2.5 text-muted">{lead.budget}</td>
-                  <td className="py-2.5 text-right">
-                    <button className="p-1 hover:bg-brand-purple/10 rounded-md transition-colors text-muted hover:text-brand-purple">
+                </tr>
+              ) : leads.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted">Aún no hay leads registrados.</span>
+                  </td>
+                </tr>
+              ) : leads.slice(0, 5).map((lead, i) => (
+                <tr key={lead.id || i} className="group hover:bg-white/[0.02] dark:hover:bg-white/[0.02] transition-colors border-b border-card-border/50 last:border-0">
+                  <td className="py-3 font-bold text-slate-800 dark:text-white/90">{lead.name || 'Desconocido'}</td>
+                  <td className="py-3 text-slate-500 dark:text-muted text-[10px] font-medium">{lead.phone || lead.email || 'Sin contacto'}</td>
+                  <td className="py-3">
+                    <div className="flex flex-col gap-1">
+                      <span className={`w-max px-2 py-0.5 rounded border text-[8px] font-black uppercase tracking-wider ${
+                        lead.status === 'closed' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
+                        lead.status === 'qualified' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                        lead.status === 'proposal' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' : 
+                        'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                      }`}>
+                        {lead.status || 'Nuevo'}
+                      </span>
+                      <span className="text-[8px] font-black uppercase tracking-widest text-muted">{lead.source || 'ORGÁNICO'}</span>
+                    </div>
+                  </td>
+                  <td className="py-3 text-emerald-500 font-bold text-[11px]">${lead.budget || '0'} <span className="text-[8px] text-muted">{lead.currency || 'USD'}</span></td>
+                  <td className="py-3 text-right">
+                    <Link href={`/chat`} className="inline-flex p-1.5 hover:bg-brand-purple/10 rounded-md transition-colors text-muted hover:text-brand-purple">
                       <ArrowUpRight size={14} />
-                    </button>
+                    </Link>
                   </td>
                 </tr>
               ))}

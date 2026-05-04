@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" data-theme="dark" className="dark">
       <body className={`${inter.variable} ${outfit.variable} font-inter bg-background text-foreground antialiased transition-colors duration-300`}>
         <ToastProvider>
           <div className="flex flex-col md:flex-row min-h-screen relative">
