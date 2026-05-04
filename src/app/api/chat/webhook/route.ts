@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       const msgData = message.message?.ephemeralMessage?.message || message.message?.viewOnceMessage?.message || message.message;
 
       // Extraction of base64 media from Evolution API when base64:true is set
-      let mediaUrl = message.base64 || message.message?.base64 || msgData?.imageMessage?.base64 || msgData?.videoMessage?.base64 || null;
+      mediaUrl = message.base64 || message.message?.base64 || msgData?.imageMessage?.base64 || msgData?.videoMessage?.base64 || null;
       if (mediaUrl && !mediaUrl.startsWith('data:')) {
         let mime = msgData?.imageMessage?.mimetype || msgData?.videoMessage?.mimetype || msgData?.audioMessage?.mimetype || msgData?.documentMessage?.mimetype || 'application/octet-stream';
         mediaUrl = `data:${mime};base64,${mediaUrl}`;
