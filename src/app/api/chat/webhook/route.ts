@@ -30,6 +30,13 @@ export async function POST(req: Request) {
       // Extract the actual message object (sometimes wrapped in ephemeralMessage or viewOnceMessage)
       const msgData = message.message?.ephemeralMessage?.message || message.message?.viewOnceMessage?.message || message.message;
 
+      // Extraction of base64 media from Evolution API when base64:true is set
+      let mediaUrl = message.base64 || message.message?.base64 || msgData?.imageMessage?.base64 || msgData?.videoMessage?.base64 || null;
+      if (mediaUrl && !mediaUrl.startsWith('data:')) {
+        let mime = msgData?.imageMessage?.mimetype || msgData?.videoMessage?.mimetype || msgData?.audioMessage?.mimetype || msgData?.documentMessage?.mimetype || 'application/octet-stream';
+        mediaUrl = `data:${mime};base64,${mediaUrl}`;
+      }
+
       // Detectar tipo de mensaje y contenido
       if (msgData?.conversation) {
         messageText = msgData.conversation;
@@ -38,19 +45,19 @@ export async function POST(req: Request) {
       } else if (msgData?.imageMessage) {
         messageType = 'image';
         messageText = msgData.imageMessage.caption || 'Imagen';
-        mediaUrl = msgData.imageMessage.url || null; 
+        mediaUrl = mediaUrl || msgData.imageMessage.url || null; 
       } else if (msgData?.videoMessage) {
         messageType = 'video';
         messageText = msgData.videoMessage.caption || 'Video';
-        mediaUrl = msgData.videoMessage.url || null;
+        mediaUrl = mediaUrl || msgData.videoMessage.url || null;
       } else if (msgData?.audioMessage) {
         messageType = 'audio';
         messageText = 'Audio';
-        mediaUrl = msgData.audioMessage.url || null;
+        mediaUrl = mediaUrl || msgData.audioMessage.url || null;
       } else if (msgData?.documentMessage) {
         messageType = 'document';
         messageText = msgData.documentMessage.title || msgData.documentMessage.fileName || 'Documento';
-        mediaUrl = msgData.documentMessage.url || null;
+        mediaUrl = mediaUrl || msgData.documentMessage.url || null;
       } else if (msgData?.stickerMessage) {
         messageType = 'image';
         messageText = 'Sticker';
@@ -59,6 +66,19 @@ export async function POST(req: Request) {
       }
 
       const connection = await mysql.createConnection(dbConfig);
+      
+      // Auto-create lead if it doesn't exist
+      if (!isFromMe) {
+        const [existing]: any = await connection.execute('SELECT id FROM leads WHERE phone = ? OR phone LIKE ? LIMIT 1', [phone, `%${phone}%`]);
+        if (existing.length === 0) {
+          const pushName = message.pushName || phone;
+          await connection.execute(
+            'INSERT INTO leads (name, phone, status, source, created_at, updated_at) VALUES (?, ?, "new", "WhatsApp", NOW(), NOW())',
+            [pushName, phone]
+          );
+        }
+      }
+
       await connection.execute(
         'INSERT INTO chat_messages (sender_id, message_text, message_type, media_url, is_from_me, timestamp) VALUES (?, ?, ?, ?, ?, NOW())',
         [phone, messageText, messageType, mediaUrl, isFromMe]

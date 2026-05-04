@@ -38,11 +38,11 @@ export const Sidebar = () => {
 
   const menuItems = [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/' },
+    { name: 'Chat AI', icon: MessageSquare, href: '/chat' },
     { name: 'Leads', icon: Users, href: '/crm' },
     { name: 'Propiedades', icon: Home, href: '/properties' },
     { name: 'Calendario', icon: CalendarIcon, href: '/calendar' },
     { name: 'Finanzas', icon: PieChart, href: '/finance' },
-    { name: 'Chat AI', icon: MessageSquare, href: '/chat' },
     { name: 'Chatbots', icon: Zap, href: '/chatbots' },
     { name: 'Ventas', icon: TrendingUp, href: '/sales' },
   ];

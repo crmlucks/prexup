@@ -51,7 +51,7 @@ export async function POST(req: Request) {
         webhook: {
           url: `${appUrl}/api/chat/webhook`,
           byEvents: false,
-          base64: false,
+          base64: true,
           events: ["MESSAGES_UPSERT"]
         }
       })
